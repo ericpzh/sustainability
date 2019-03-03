@@ -22,15 +22,15 @@ class Header extends Component {
     return (
       <div>
         <Navbar color="light" light expand="md">
-          <NavbarBrand href="/"><img src = { logo } alt = '404' className = "header-logo"/></NavbarBrand>
+          <NavbarBrand href="/sustainability"><img src = { logo } alt = '404' className = "header-logo"/></NavbarBrand>
           <NavbarToggler onClick={this.toggle} />
           <Collapse isOpen={this.state.isOpen} navbar>
             <Nav className="ml-auto" navbar>
               <NavItem>
-                <NavLink href="/">Sustainable Materials Advisor</NavLink>
+                <NavLink href="/sustainability">Sustainable Materials Advisor</NavLink>
               </NavItem>
               <NavItem>
-                <NavLink href="/Table">Material List</NavLink>
+                <NavLink href="/sustainability/Table">Material List</NavLink>
               </NavItem>
             </Nav>
           </Collapse>

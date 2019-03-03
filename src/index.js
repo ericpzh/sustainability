@@ -12,8 +12,8 @@ import Table from './CSV/Table.js';
 ReactDOM.render((
     <Router>
         <div>
-            <Route exact path="/" component={App}/>
-            <Route exact path="/Table" component={Table}/>
+            <Route exact path="/sustainability/" component={App}/>
+            <Route exact path="/sustainability/Table" component={Table}/>
         </div>
     </Router>
     ),
