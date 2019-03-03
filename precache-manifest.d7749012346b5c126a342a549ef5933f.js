@@ -16,15 +16,15 @@ self.__precacheManifest = [
     "url": "/sustainability/static/js/runtime~main.025dd5a4.js"
   },
   {
-    "revision": "c9e4f140bea58f0fa8ca",
-    "url": "/sustainability/static/js/main.c9e4f140.chunk.js"
+    "revision": "df2d18e23ab54698a81d",
+    "url": "/sustainability/static/js/main.df2d18e2.chunk.js"
   },
   {
     "revision": "a84305e1d0822e8c5f1f",
     "url": "/sustainability/static/js/2.a84305e1.chunk.js"
   },
   {
-    "revision": "c9e4f140bea58f0fa8ca",
+    "revision": "df2d18e23ab54698a81d",
     "url": "/sustainability/static/css/main.d5649a70.chunk.css"
   },
   {
@@ -32,7 +32,7 @@ self.__precacheManifest = [
     "url": "/sustainability/static/css/2.75407df9.chunk.css"
   },
   {
-    "revision": "56756f76e7a868504b38d5afd529810b",
+    "revision": "67cfef2206161f979460094ea5ce79f7",
     "url": "/sustainability/index.html"
   }
 ];
