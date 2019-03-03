@@ -13,7 +13,7 @@ ReactDOM.render((
     <Router>
         <div>
             <Route exact path="/sustainability/" component={App}/>
-            <Route exact path="/sustainability/table" component={Table}/>
+            <Route exact path="/sustainability/Table" component={Table}/>
         </div>
     </Router>
     ),
