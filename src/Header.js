@@ -30,7 +30,7 @@ class Header extends Component {
                 <NavLink href="/sustainability">Sustainable Materials Advisor</NavLink>
               </NavItem>
               <NavItem>
-                <NavLink href="/sustainability/Table">Material List</NavLink>
+                <NavLink href="/sustainability/table">Material List</NavLink>
               </NavItem>
             </Nav>
           </Collapse>

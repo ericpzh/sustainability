@@ -3,6 +3,13 @@ import { Button, ButtonGroup } from 'reactstrap';
 import CheckboxTree from 'react-checkbox-tree';
 import 'react-checkbox-tree/lib/react-checkbox-tree.css';
 import './Home.css';
+import check from '.././assets/check.png';
+import uncheck from '.././assets/uncheck.png';
+import halfCheck from '.././assets/halfCheck.png';
+import expandClose from '.././assets/expandClose.png';
+import expandOpen from '.././assets/expandOpen.png';
+import parentClose from '.././assets/parentClose.png';
+import parentOpen from '.././assets/parentOpen.png';
 import leaf from '.././assets/leaf.png';
 
 class Filter extends Component {
@@ -70,9 +77,16 @@ class Filter extends Component {
                 expanded={this.props.expanded}
                 onCheck={this.props.onCheck}
                 onExpand={this.props.onExpand}
-                showExpandAll
+                showExpandAll={false}
                 expandOnClick={true}
                 icons={{
+                    check: <span><img src={check} alt="404"/></span>,
+                    uncheck: <span><img src={uncheck} alt="404"/></span>,
+                    halfCheck: <span><img src={halfCheck} alt="404"/></span>,
+                    expandClose: <span><img src={expandClose} alt="404"/></span>,
+                    expandOpen: <span><img src={expandOpen} alt="404"/></span>,
+                    parentClose: <span><img src={parentClose} alt="404"/></span>,
+                    parentOpen: <span><img src={parentOpen} alt="404"/></span>,
                     leaf: <span><img src={leaf} alt="404"/></span>,
                 }}
 
