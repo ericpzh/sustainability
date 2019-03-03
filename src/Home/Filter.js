@@ -64,11 +64,11 @@ class Filter extends Component {
       return (
         <div className="Filter">
           <div className="filtergroup">
-            <ButtonGroup vertical>
-            <Button color="success" onClick={() => this.props.set("RoHS")} active={this.props.selected.includes("RoHS")} className = "Button1">RoHS</Button>
-            <Button color="success" onClick={() => this.props.set("Food")} active={this.props.selected.includes("Food")} className = "Button1">Food Contact</Button>
-            <Button color="success" onClick={() => this.props.set("Recycle")} active={this.props.selected.includes("Recycle")} className = "Button1">Recyclable</Button>
-            </ButtonGroup>
+
+            <Button color="secondary" onClick={() => this.props.set("RoHS")} active={this.props.selected.includes("RoHS")} className = "buttonfilter">RoHS</Button>
+            <Button color="secondary" onClick={() => this.props.set("Food")} active={this.props.selected.includes("Food")} className = "buttonfilter">Food Contact</Button>
+            <Button color="secondary" onClick={() => this.props.set("Recycle")} active={this.props.selected.includes("Recycle")} className = "buttonfilter">Recyclable</Button>
+
           </div>
           <div className="checkboxtree">
             <CheckboxTree
