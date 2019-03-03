@@ -5,6 +5,7 @@
   "homepage": "https://ericpzh.github.io/sustainability",
   "dependencies": {
     "bootstrap": "^4.3.1",
+    "gh-pages": "^2.0.1",
     "install": "^0.12.2",
     "mathjs": "^5.5.0",
     "npm": "^6.8.0",
@@ -16,6 +17,7 @@
     "react-checkbox-tree": "^1.5.1",
     "react-dom": "^16.8.3",
     "react-favicon": "0.0.14",
+    "react-modal": "^3.8.1",
     "react-plotly.js": "^2.3.0",
     "react-router-dom": "^4.3.1",
     "react-scripts": "2.1.5",

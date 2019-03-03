@@ -5,3 +5,23 @@
 .header-logo{
   height: 5vh;
 }
+.Modal {
+   position: absolute;
+   top: 1%;
+   left: 1%;
+   right: 1%;
+   bottom: 1%;
+   background-color: #eee;
+   z-index: 99999;
+   overflow-y: auto;
+ }
+
+ .Overlay {
+   position: fixed;
+   top: 0;
+   left: 0;
+   right: 0;
+   bottom: 0;
+   background-color: #111;
+   z-index: 9999;
+ }

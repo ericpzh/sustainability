@@ -2,7 +2,8 @@ import React, { Component } from 'react';
 import Header from '../Header.js';
 import {BootstrapTable, TableHeaderColumn} from 'react-bootstrap-table';
 import 'react-bootstrap-table/dist/react-bootstrap-table-all.min.css';
-
+import Favicon from 'react-favicon';
+import favicon from '../assets/favicon.ico'
 
 class BSTable extends React.Component {
   render() {
@@ -66,6 +67,7 @@ class Table extends Component {
     });
     window.addEventListener('resize', this.updateWindowDimensions);
     this.updateWindowDimensions();
+    document.title = "Sustainable Materials Advisor";
   }
   componentWillUnmount(){
     window.removeEventListener('resize', this.updateWindowDimensions);
@@ -127,6 +129,7 @@ class Table extends Component {
     if (this.state.width < 1024){
       return (
         <div className="Table">
+        <Favicon url={favicon} />
          <Header/>
          <BootstrapTable data={this.state.data} options={ options } expandComponent={ this.expandComponent } expandColumnOptions={ { expandColumnVisible: true } } expandableRow={ this.isExpandableRow }>
             <TableHeaderColumn dataField='Type' dataSort filter={ { type: 'TextFilter', delay: 100 } } tdStyle={ { whiteSpace: 'normal' } } thStyle={ { whiteSpace: 'normal' } }> Type </TableHeaderColumn>
@@ -137,6 +140,7 @@ class Table extends Component {
     }else{
       return (
         <div className="Table">
+        <Favicon url={favicon} />
          <Header/>
          <BootstrapTable data={this.state.data} options={ options } >
             <TableHeaderColumn dataField='Type' dataSort filter={ { type: 'TextFilter', delay: 100 } } tdStyle={ { whiteSpace: 'normal' } } thStyle={ { whiteSpace: 'normal' } }> Type </TableHeaderColumn>
