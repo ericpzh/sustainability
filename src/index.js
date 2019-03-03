@@ -10,10 +10,11 @@ import Table from './CSV/Table.js';
 //ReactDOM.render(<App />, document.getElementById('root'));
 
 ReactDOM.render((
-    <Router>
+  <Router basename={'/sustainability'}>
         <div>
-            <Route exact path="/sustainability/" component={App}/>
-            <Route exact path="/sustainability/Table" component={Table}/>
+
+            <Route exact path="/" component={App}/>
+            <Route path="/Table" component={Table}/>
         </div>
     </Router>
     ),
