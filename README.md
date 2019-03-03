@@ -1,6 +1,6 @@
 # Get started:
 
-### Download Latest Node.js here: https://nodejs.org/en/
+### Download the latest Node.js version: https://nodejs.org/en/
 
 ### Install all dependency:
 ``` shell
