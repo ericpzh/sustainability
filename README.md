@@ -14,7 +14,7 @@ npm i reactstrap bootstrap react-router-dom react-checkbox-tree react-plotly.js 
 cd sustainability
 npm start
 ```
-Open: 
+In your browser open: 
 http://localhost:3000/sustainability
 
 ### To deploy:
