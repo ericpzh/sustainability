@@ -47,14 +47,14 @@ class Graph extends Component {
       this.setState({
         width: window.innerWidth,
         height: window.innerHeight,
-        graphheight : 0.55 * window.innerHeight,
+        graphheight : 0.45 * window.innerHeight,
         graphwidth : 0.75 * window.innerWidth,
        });
     }else{
       this.setState({
         width: window.innerWidth,
         height: window.innerHeight,
-        graphheight : 0.55 * window.innerHeight,
+        graphheight : 0.45 * window.innerHeight,
         graphwidth : 0.95 * window.innerWidth,
        });
     }
@@ -76,7 +76,7 @@ class Graph extends Component {
     var collapsed = this.state.collapsed;
     if (collapsed){
       this.setState({
-        graphheight : 0.55 * window.innerHeight,
+        graphheight : 0.45 * window.innerHeight,
        });
     }else{
       this.setState({
