@@ -10,10 +10,11 @@ class Home extends Component {
     super(props);
     this.state = {
         data : [],
-        checked: [],
+        checked: [], //from tree
         expanded: [],
-        selected: [],
+        selected: [], //from filters
         sidebarOpen: false,
+        modal: false,
         width: window.innerWidth,
         height: window.innerHeight,
         overlay: true,
@@ -25,6 +26,7 @@ class Home extends Component {
     this.initData = this.initData.bind(this);
     this.setselected = this.setselected.bind(this);
     this.sidebartoggle = this.sidebartoggle.bind(this);
+    this.modaltoggle = this.modaltoggle.bind(this);
     this.updateWindowDimensions = this.updateWindowDimensions.bind(this);
   }
 
@@ -131,6 +133,17 @@ class Home extends Component {
      });
   }
 
+  modaltoggle() {
+    if (this.state.modal == false){
+      this.setState({
+        sidebarOpen: false,
+       });
+    }
+    this.setState(prevState => ({
+      modal: !prevState.modal
+    }));
+  }
+
   render() {
     return (
       <div className="Home">
@@ -142,7 +155,7 @@ class Home extends Component {
           </Menu>
           <main id="page-wrap" style={{}}>
             <div className="scroll-fix">
-              <Graph data = {this.state.data} checked = {this.state.checked} selected = {this.state.selected} sidebartoggle = {this.sidebartoggle} sidebarOpen = {this.state.sidebarOpen} selectionwidth = {this.state.selectionwidth}/>
+              <Graph data = {this.state.data} checked = {this.state.checked} selected = {this.state.selected} sidebartoggle = {this.sidebartoggle} sidebarOpen = {this.state.sidebarOpen} selectionwidth = {this.state.selectionwidth} modal = {this.state.modal} modaltoggle = {this.modaltoggle}/>
             </div>
           </main>
         </div>
