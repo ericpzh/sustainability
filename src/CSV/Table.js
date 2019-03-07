@@ -126,43 +126,45 @@ class Table extends Component {
     var options = {
       defaultSortName: 'Type',
       defaultSortOrder: 'aesc',
-    };  if (store.get('password') !== store.get('correctpassword')){
-        return(
-          <div>
-            <Login/>
+    };
+    if (store.get('password') === store.get('correctpassword') && typeof store.get('correctpassword') !== "undefined"){
+      if (this.state.width < 1024){
+        return (
+          <div className="Table">
+          <Favicon url={favicon} />
+           <Header/>
+           <BootstrapTable data={this.state.data} options={ options } expandComponent={ this.expandComponent } expandColumnOptions={ { expandColumnVisible: true } } expandableRow={ this.isExpandableRow }>
+              <TableHeaderColumn dataField='Type' dataSort filter={ { type: 'TextFilter', delay: 100 } } tdStyle={ { whiteSpace: 'normal' } } thStyle={ { whiteSpace: 'normal' } }> Type </TableHeaderColumn>
+              <TableHeaderColumn dataField='Name' isKey dataSort filter={ { type: 'TextFilter', delay: 100 } } tdStyle={ { whiteSpace: 'normal' } } thStyle={ { whiteSpace: 'normal' } }> Name </TableHeaderColumn>
+          </BootstrapTable>
           </div>
         );
       }else{
-        if (this.state.width < 1024){
-          return (
-            <div className="Table">
+        return (
+          <div className="Table">
+          <Favicon url={favicon} />
+           <Header/>
+           <BootstrapTable data={this.state.data} options={ options } >
+              <TableHeaderColumn dataField='Type' dataSort filter={ { type: 'TextFilter', delay: 100 } } tdStyle={ { whiteSpace: 'normal' } } thStyle={ { whiteSpace: 'normal' } }> Type </TableHeaderColumn>
+              <TableHeaderColumn dataField='Name' isKey dataSort filter={ { type: 'TextFilter', delay: 100 } } tdStyle={ { whiteSpace: 'normal' } } thStyle={ { whiteSpace: 'normal' } }> Name </TableHeaderColumn>
+              <TableHeaderColumn dataField='Material'  dataSort filter={ { type: 'NumberFilter', delay: 100, numberComparators: ['>','=','<'],defaultValue: { number: 0, comparator: '>=' } }} tdStyle={ { whiteSpace: 'normal' } } thStyle={ { whiteSpace: 'normal' } }>Material Impacts(kg-CO2-eq)</TableHeaderColumn>
+              <TableHeaderColumn dataField='Disposal' dataSort filter={ { type: 'NumberFilter', delay: 100, numberComparators: ['>','=','<'],defaultValue: { number: 0, comparator: '>=' }}} tdStyle={ { whiteSpace: 'normal' } } thStyle={ { whiteSpace: 'normal' } }>Disposal Impacts(kg-CO2-eq)</TableHeaderColumn>
+              <TableHeaderColumn dataField='EoL' dataSort filter={ { type: 'NumberFilter', delay: 100, numberComparators: ['>','=','<'],defaultValue: { number: 0, comparator: '>=' } }} tdStyle={ { whiteSpace: 'normal' } } thStyle={ { whiteSpace: 'normal' } }>EoL Potential(kg-CO2-eq)</TableHeaderColumn>
+              <TableHeaderColumn dataField='Cost' dataSort filter={ { type: 'NumberFilter', delay: 100, numberComparators: ['>','=','<'],defaultValue: { number: 0, comparator: '>=' }}} tdStyle={ { whiteSpace: 'normal' } } thStyle={ { whiteSpace: 'normal' } }>Cost ($)</TableHeaderColumn>
+              <TableHeaderColumn dataField='RoHS' dataSort filter={ { type: 'NumberFilter', delay: 100, numberComparators: ['>','=','<'],defaultValue: { number: 0, comparator: '>=' } }} tdStyle={ { whiteSpace: 'normal' } } thStyle={ { whiteSpace: 'normal' } }>RoHS</TableHeaderColumn>
+              <TableHeaderColumn dataField='Food' dataSort filter={ { type: 'NumberFilter', delay: 100, numberComparators: ['>','=','<'],defaultValue: { number: 0, comparator: '>=' }}} tdStyle={ { whiteSpace: 'normal' } } thStyle={ { whiteSpace: 'normal' } }>Food Contact</TableHeaderColumn>
+              <TableHeaderColumn dataField='Recycle' dataSort filter={ { type: 'NumberFilter', delay: 100, numberComparators: ['>','=','<'],defaultValue: { number: 0, comparator: '>=' } }} tdStyle={ { whiteSpace: 'normal' } } thStyle={ { whiteSpace: 'normal' } }>Recyclable</TableHeaderColumn>
+          </BootstrapTable>
+          </div>
+        );
+      }
+    }else{
+        return(
+          <div>
             <Favicon url={favicon} />
-             <Header/>
-             <BootstrapTable data={this.state.data} options={ options } expandComponent={ this.expandComponent } expandColumnOptions={ { expandColumnVisible: true } } expandableRow={ this.isExpandableRow }>
-                <TableHeaderColumn dataField='Type' dataSort filter={ { type: 'TextFilter', delay: 100 } } tdStyle={ { whiteSpace: 'normal' } } thStyle={ { whiteSpace: 'normal' } }> Type </TableHeaderColumn>
-                <TableHeaderColumn dataField='Name' isKey dataSort filter={ { type: 'TextFilter', delay: 100 } } tdStyle={ { whiteSpace: 'normal' } } thStyle={ { whiteSpace: 'normal' } }> Name </TableHeaderColumn>
-            </BootstrapTable>
-            </div>
-          );
-        }else{
-          return (
-            <div className="Table">
-            <Favicon url={favicon} />
-             <Header/>
-             <BootstrapTable data={this.state.data} options={ options } >
-                <TableHeaderColumn dataField='Type' dataSort filter={ { type: 'TextFilter', delay: 100 } } tdStyle={ { whiteSpace: 'normal' } } thStyle={ { whiteSpace: 'normal' } }> Type </TableHeaderColumn>
-                <TableHeaderColumn dataField='Name' isKey dataSort filter={ { type: 'TextFilter', delay: 100 } } tdStyle={ { whiteSpace: 'normal' } } thStyle={ { whiteSpace: 'normal' } }> Name </TableHeaderColumn>
-                <TableHeaderColumn dataField='Material'  dataSort filter={ { type: 'NumberFilter', delay: 100, numberComparators: ['>','=','<'],defaultValue: { number: 0, comparator: '>=' } }} tdStyle={ { whiteSpace: 'normal' } } thStyle={ { whiteSpace: 'normal' } }>Material Impacts(kg-CO2-eq)</TableHeaderColumn>
-                <TableHeaderColumn dataField='Disposal' dataSort filter={ { type: 'NumberFilter', delay: 100, numberComparators: ['>','=','<'],defaultValue: { number: 0, comparator: '>=' }}} tdStyle={ { whiteSpace: 'normal' } } thStyle={ { whiteSpace: 'normal' } }>Disposal Impacts(kg-CO2-eq)</TableHeaderColumn>
-                <TableHeaderColumn dataField='EoL' dataSort filter={ { type: 'NumberFilter', delay: 100, numberComparators: ['>','=','<'],defaultValue: { number: 0, comparator: '>=' } }} tdStyle={ { whiteSpace: 'normal' } } thStyle={ { whiteSpace: 'normal' } }>EoL Potential(kg-CO2-eq)</TableHeaderColumn>
-                <TableHeaderColumn dataField='Cost' dataSort filter={ { type: 'NumberFilter', delay: 100, numberComparators: ['>','=','<'],defaultValue: { number: 0, comparator: '>=' }}} tdStyle={ { whiteSpace: 'normal' } } thStyle={ { whiteSpace: 'normal' } }>Cost ($)</TableHeaderColumn>
-                <TableHeaderColumn dataField='RoHS' dataSort filter={ { type: 'NumberFilter', delay: 100, numberComparators: ['>','=','<'],defaultValue: { number: 0, comparator: '>=' } }} tdStyle={ { whiteSpace: 'normal' } } thStyle={ { whiteSpace: 'normal' } }>RoHS</TableHeaderColumn>
-                <TableHeaderColumn dataField='Food' dataSort filter={ { type: 'NumberFilter', delay: 100, numberComparators: ['>','=','<'],defaultValue: { number: 0, comparator: '>=' }}} tdStyle={ { whiteSpace: 'normal' } } thStyle={ { whiteSpace: 'normal' } }>Food Contact</TableHeaderColumn>
-                <TableHeaderColumn dataField='Recycle' dataSort filter={ { type: 'NumberFilter', delay: 100, numberComparators: ['>','=','<'],defaultValue: { number: 0, comparator: '>=' } }} tdStyle={ { whiteSpace: 'normal' } } thStyle={ { whiteSpace: 'normal' } }>Recyclable</TableHeaderColumn>
-            </BootstrapTable>
-            </div>
-          );
-        }
+            <Login/>
+          </div>
+        );
       }
   }
 }

@@ -19,18 +19,19 @@ class App extends Component {
   }
   render() {
     //store.set('password', '' );
-    if (store.get('password') !== store.get('correctpassword')){
+    if (store.get('password') === store.get('correctpassword') && typeof store.get('correctpassword') !== "undefined"){
       return(
-        <div>
-          <Login/>
-        </div>
-      );
-    }else{
-      return (
         <div className="App">
           <Favicon url={favicon} />
           <Header/>
           <Home/>
+        </div>
+      );
+    }else{
+      return (
+        <div>
+          <Favicon url={favicon} />
+          <Login/>
         </div>
       );
     }
