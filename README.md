@@ -29,3 +29,5 @@ http://localhost:3000/sustainability
 ``` shell
 npm run deploy
 ```
+
+## Password: uiucpassword
