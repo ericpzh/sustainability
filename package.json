@@ -21,7 +21,8 @@
     "react-router-dom": "^4.3.1",
     "react-scripts": "2.1.5",
     "react-switch": "^4.1.0",
-    "reactstrap": "^7.1.0"
+    "reactstrap": "^7.1.0",
+    "store": "^2.0.12"
   },
   "scripts": {
     "predeploy": "npm run build",
@@ -31,7 +32,7 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
-	"jest": {
+  "jest": {
     "collectCoverageFrom": [
       "src/**/*.{js,jsx,mjs}"
     ],

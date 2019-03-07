@@ -96,6 +96,7 @@ class Home extends Component {
       this.state.selected.splice(index, 1);
     }
     this.setState({ selected: [...this.state.selected] });
+    console.log(selected)
   }
 
   updateWindowDimensions() {

@@ -55,7 +55,7 @@ class Graph extends Component {
       this.setState({
         width: window.innerWidth,
         height: window.innerHeight,
-        graphheight : 0.45 * window.innerHeight,
+        graphheight : 0.75 * window.innerHeight,
         graphwidth : 0.95 * window.innerWidth,
        });
     }

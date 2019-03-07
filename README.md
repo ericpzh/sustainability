@@ -7,7 +7,7 @@
 ## Install all dependency:
 ``` shell
 cd sustainability
-npm i reactstrap bootstrap react-router-dom react-checkbox-tree react-plotly.js plotly.js papaparse mathjs react-switch react-bootstrap-table-next react-router-dom react-bootstrap-table react-burger-menu gh-pages react-favicon
+npm i reactstrap bootstrap react-router-dom react-checkbox-tree react-plotly.js plotly.js papaparse mathjs react-switch react-bootstrap-table-next react-router-dom react-bootstrap-table react-burger-menu gh-pages react-favicon store
 ```
 ### Install React if necessary:
 ``` shell
@@ -21,7 +21,7 @@ npm i react
 cd sustainability
 npm start
 ```
-### In your browser open: 
+### In your browser open:
 http://localhost:3000/sustainability
 
 
