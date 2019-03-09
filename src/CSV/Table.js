@@ -24,7 +24,7 @@ class Table extends Component {
   constructor(props) {
       super(props);
       this.state = {
-        data : [{Type:"",Name:"",Material:"",Disposal:"",EoL:"",Cost:"",RoHS:"",Food:"",Recycle:"",Density:""}],
+        data : [{Type:"",Name:"",Material:"",Disposal:"",EoL:"",Cost:"",RoHS:"",Food:"",Recycle:"",Density:"",Lifecycle:""}],
         width: window.innerWidth,
         height: window.innerHeight,
       };
@@ -39,13 +39,16 @@ class Table extends Component {
     var data = [];
     for (var i = 0 ; i < this.state.data.length ; i++){
       if (this.state.data[i]['Name'] == row['Name']){
-        data = [{Category: "Material Impacts(kg-CO2-eq)", Number:this.state.data[i]['Material']},
-                    {Category: "Disposal Impacts(kg-CO2-eq)", Number:this.state.data[i]['Disposal']},
-                    {Category: "EoL Potential(kg-CO2-eq", Number:this.state.data[i]['EoL']},
-                    {Category: "Cost ($)", Number:this.state.data[i]['Cost']},
-                    {Category: "RoHS", Number:this.state.data[i]['RoHS']},
-                    {Category: "Food Contact", Number:this.state.data[i]['Food']},
-                    {Category: "Recyclable", Number:this.state.data[i]['Recycle']}];
+        data = [
+          {Category: "Lifecycle Impacts(kg-CO2-eq)", Number:this.state.data[i]['Lifecycle']},
+          {Category: "Material Impacts(kg-CO2-eq)", Number:this.state.data[i]['Material']},
+          {Category: "Disposal Impacts(kg-CO2-eq)", Number:this.state.data[i]['Disposal']},
+          {Category: "EoL Potential(kg-CO2-eq", Number:this.state.data[i]['EoL']},
+          {Category: "Cost ($)", Number:this.state.data[i]['Cost']},
+          {Category: "RoHS", Number:this.state.data[i]['RoHS']},
+          {Category: "Food Contact", Number:this.state.data[i]['Food']},
+          {Category: "Recyclable", Number:this.state.data[i]['Recycle']}
+        ];
         break;
       }
     }
@@ -91,12 +94,13 @@ class Table extends Component {
   initData(result) {
     var data = [];
     for (var i = 0; i < result.data.length; i++){
-      if(result.data[i]["Density"]==0){
+      if(result.data[i]["Density"]===0){
         data.push({
           Type:result.data[i]["Type"],
           Name:result.data[i]["Name"],
           Material:0,
           Disposal:0,
+          Lifecycle:0,
           EoL:0,
           Cost:0,
           RoHS:this.bool2string(result.data[i]["RoHS"]),
@@ -114,6 +118,7 @@ class Table extends Component {
           RoHS:this.bool2string(result.data[i]["RoHS"]),
           Food:this.bool2string(result.data[i]["Food"]),
           Recycle:this.bool2string(result.data[i]["Recycle"]),
+          Lifecycle:Math.round(parseFloat(result.data[i]["Lifecycle Impacts"])/parseFloat(result.data[i]["Density"]) * 1000) / 1000,
         });
       }
     }
@@ -147,6 +152,7 @@ class Table extends Component {
            <BootstrapTable data={this.state.data} options={ options } >
               <TableHeaderColumn dataField='Type' dataSort filter={ { type: 'TextFilter', delay: 100 } } tdStyle={ { whiteSpace: 'normal' } } thStyle={ { whiteSpace: 'normal' } }> Type </TableHeaderColumn>
               <TableHeaderColumn dataField='Name' isKey dataSort filter={ { type: 'TextFilter', delay: 100 } } tdStyle={ { whiteSpace: 'normal' } } thStyle={ { whiteSpace: 'normal' } }> Name </TableHeaderColumn>
+              <TableHeaderColumn dataField='Lifecycle'  dataSort filter={ { type: 'NumberFilter', delay: 100, numberComparators: ['>','=','<'],defaultValue: { number: 0, comparator: '>=' } }} tdStyle={ { whiteSpace: 'normal' } } thStyle={ { whiteSpace: 'normal' } }>Lifecycle Impacts(kg-CO2-eq)</TableHeaderColumn>
               <TableHeaderColumn dataField='Material'  dataSort filter={ { type: 'NumberFilter', delay: 100, numberComparators: ['>','=','<'],defaultValue: { number: 0, comparator: '>=' } }} tdStyle={ { whiteSpace: 'normal' } } thStyle={ { whiteSpace: 'normal' } }>Material Impacts(kg-CO2-eq)</TableHeaderColumn>
               <TableHeaderColumn dataField='Disposal' dataSort filter={ { type: 'NumberFilter', delay: 100, numberComparators: ['>','=','<'],defaultValue: { number: 0, comparator: '>=' }}} tdStyle={ { whiteSpace: 'normal' } } thStyle={ { whiteSpace: 'normal' } }>Disposal Impacts(kg-CO2-eq)</TableHeaderColumn>
               <TableHeaderColumn dataField='EoL' dataSort filter={ { type: 'NumberFilter', delay: 100, numberComparators: ['>','=','<'],defaultValue: { number: 0, comparator: '>=' } }} tdStyle={ { whiteSpace: 'normal' } } thStyle={ { whiteSpace: 'normal' } }>EoL Potential(kg-CO2-eq)</TableHeaderColumn>

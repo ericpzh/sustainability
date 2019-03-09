@@ -36,7 +36,7 @@ class Graph extends Component {
       this.addcircle = this.addcircle.bind(this);
       this.isvalid = this.isvalid.bind(this);
       this.state = {
-          xaxis: "Material Impacts",
+          xaxis: "Lifecycle Impacts",
           yaxis: "Cost",
           width: window.innerWidth,
           height: window.innerHeight,
@@ -276,16 +276,18 @@ class Graph extends Component {
   }
 
   processResult(data,checked){
-      var result= {MaterialMass:'',CostMass:'',DisposalMass:'',EoLMass:'',MaterialVol:'',CostVol:'',DisposalVol:'',EoLVol:''};
+      var result= {MaterialMass:'',CostMass:'',DisposalMass:'',EoLMass:'',LCMass:'',MaterialVol:'',CostVol:'',DisposalVol:'',EoLVol:'',LCVol:''};
       if (data.length > 0 && checked.length > 0){
         var materialmass = [];
         var costmass = [];
         var disposalmass = [];
         var eolmass = [];
+        var lcmass = [];
         var materialvol = [];
         var costvol = [];
         var disposalvol = [];
         var eolvol = [];
+        var lcvol = [];
         for (var i = 0; i < data.length ; i++){
           if (data[i]['Type'] !== "" &&  checked.includes(data[i]['Name']) && this.checkselected(data[i]) && this.isvalid(data[i])){
             if (data[i]['Density'] !== 0){
@@ -293,11 +295,13 @@ class Graph extends Component {
               costmass.push({name:data[i]['Name'],value:data[i]['Cost']/data[i]['Density']});
               disposalmass.push({name:data[i]['Name'],value:data[i]['Disposal Impacts']/data[i]['Density']});
               eolmass.push({name:data[i]['Name'],value:data[i]['EoL potential']/data[i]['Density']});
+              lcmass.push({name:data[i]['Name'],value:data[i]['Lifecycle Impacts']/data[i]['Density']})
             }
             materialvol.push({name:data[i]['Name'],value:data[i]['Material Impacts']});
             costvol.push({name:data[i]['Name'],value:data[i]['Cost']});
             disposalvol.push({name:data[i]['Name'],value:data[i]['Disposal Impacts']});
             eolvol.push({name:data[i]['Name'],value:data[i]['EoL potential']});
+            lcvol.push({name:data[i]['Name'],value:data[i]['Lifecycle Impacts']})
           }
         }
         if (materialmass.length > 0){
@@ -312,6 +316,9 @@ class Graph extends Component {
         if (eolmass.length > 0){
           result['EoLMass'] = eolmass.sort(function(a, b){return a['value'] - b['value']})[0]['name'];
         }
+        if (lcmass.length > 0){
+          result['LCMass'] = lcmass.sort(function(a, b){return a['value'] - b['value']})[0]['name'];
+        }
         if (materialvol.length > 0){
           result['MaterialVol'] = materialvol.sort(function(a, b){return a['value'] - b['value']})[0]['name'];
         }
@@ -323,6 +330,9 @@ class Graph extends Component {
         }
         if (eolvol.length > 0){
           result['EoLVol'] = eolvol.sort(function(a, b){return a['value'] - b['value']})[0]['name'];
+        }
+        if (lcvol.length > 0){
+          result['LCVol'] = lcvol.sort(function(a, b){return a['value'] - b['value']})[0]['name'];
         }
       }
       return result;
@@ -375,11 +385,13 @@ class Graph extends Component {
           <p>Cost: {this.processResult(this.props.data,this.props.checked)['CostMass']}</p>
           <p>Disposal Impacts: {this.processResult(this.props.data,this.props.checked)['DisposalMass']}</p>
           <p>EoL potential: {this.processResult(this.props.data,this.props.checked)['EoLMass']}</p>
+          <p>Lifecycle Impacts: {this.processResult(this.props.data,this.props.checked)['LCMass']}</p>
           <h2>Per Volume: </h2>
           <p>Material Impacts: {this.processResult(this.props.data,this.props.checked)['MaterialVol']}</p>
           <p>Cost: {this.processResult(this.props.data,this.props.checked)['CostVol']}</p>
           <p>Disposal Impacts: {this.processResult(this.props.data,this.props.checked)['DisposalVol']}</p>
           <p>EoL potential: {this.processResult(this.props.data,this.props.checked)['EoLVol']}</p>
+          <p>Lifecycle Impacts: {this.processResult(this.props.data,this.props.checked)['LCVol']}</p>
         </ModalBody>
       </Modal>
       <Navbar color="faded" light style = {{width: this.props.selectionwidth}}>
@@ -393,6 +405,7 @@ class Graph extends Component {
               <div className = "select-axis">
                 <Label for="exampleSelect" className = "select-axis-item">Select X axis:</Label>
                 <Input type="select" placeholder="x axis" name="xselect" id="xSelect" className = "select-axis-item" value={this.state.xaxis} onChange={this.changex}>
+                  <option>Lifecycle Impacts</option>
                   <option>Material Impacts</option>
                   <option>Cost</option>
                   <option>Disposal Impacts</option>
@@ -402,6 +415,7 @@ class Graph extends Component {
               <div className = "select-axis">
                 <Label for="exampleSelect" className = "select-axis-item">Select Y axis:</Label>
                 <Input type="select" placeholder="y axis" name="yselect" id="ySelect" className = "select-axis-item" value={this.state.yaxis} onChange={this.changey}>
+                  <option>Lifecycle Impacts</option>
                   <option>Material Impacts</option>
                   <option>Cost</option>
                   <option>Disposal Impacts</option>

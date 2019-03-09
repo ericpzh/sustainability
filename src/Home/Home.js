@@ -72,13 +72,13 @@ class Home extends Component {
     for (var i = 0; i < result.data.length ; i++){
       checked.push(result.data[i]['Name']);
       cost.push(result.data[i]['Cost']);
-      impacts.push(result.data[i]['Material Impacts']);
+      impacts.push(result.data[i]['Lifecycle Impacts']);
     }
     var impacts75th = math.quantileSeq(impacts, 0.75);
     var cost75th = math.quantileSeq(cost, 0.75);
     checked = [];
     for (var i = 0; i < result.data.length ; i++){
-      if (result.data[i]['Material Impacts'] < 3 * impacts75th && result.data[i]['Cost'] < 3 * cost75th){
+      if (result.data[i]['Lifecycle Impacts'] < 3 * impacts75th && result.data[i]['Cost'] < 3 * cost75th){
         checked.push(result.data[i]['Name']);
       }
     }
