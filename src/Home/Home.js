@@ -28,6 +28,7 @@ class Home extends Component {
     this.sidebartoggle = this.sidebartoggle.bind(this);
     this.modaltoggle = this.modaltoggle.bind(this);
     this.updateWindowDimensions = this.updateWindowDimensions.bind(this);
+    this.updatechecked = this.updatechecked.bind(this);
   }
 
   componentDidMount() {
@@ -96,7 +97,6 @@ class Home extends Component {
       this.state.selected.splice(index, 1);
     }
     this.setState({ selected: [...this.state.selected] });
-    console.log(selected)
   }
 
   updateWindowDimensions() {
@@ -145,6 +145,12 @@ class Home extends Component {
     }));
   }
 
+  updatechecked(checked){
+    this.setState({
+      checked: checked
+    });
+  }
+
   render() {
     return (
       <div className="Home">
@@ -156,7 +162,7 @@ class Home extends Component {
           </Menu>
           <main id="page-wrap" style={{}}>
             <div className="scroll-fix">
-              <Graph data = {this.state.data} checked = {this.state.checked} selected = {this.state.selected} sidebartoggle = {this.sidebartoggle} sidebarOpen = {this.state.sidebarOpen} selectionwidth = {this.state.selectionwidth} modal = {this.state.modal} modaltoggle = {this.modaltoggle}/>
+              <Graph data = {this.state.data} checked = {this.state.checked} selected = {this.state.selected} sidebartoggle = {this.sidebartoggle} sidebarOpen = {this.state.sidebarOpen} selectionwidth = {this.state.selectionwidth} modal = {this.state.modal} modaltoggle = {this.modaltoggle} updatechecked = {this.updatechecked}/>
             </div>
           </main>
         </div>

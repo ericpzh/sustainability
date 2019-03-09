@@ -12,6 +12,7 @@ class Login extends Component {
       password: '',
     };
     this.login = this.login.bind(this);
+    this.handleKeyPress = this.handleKeyPress.bind(this);
   }
   componentDidMount(){
     document.title = "Sustainable Materials Advisor";
@@ -25,7 +26,11 @@ class Login extends Component {
     }
     this.forceUpdate();
   }
-
+  handleKeyPress(target){
+    if (target.charCode === 13){
+      this.login();
+    }
+  }
   render() {
     if(store.get('password') === store.get('correctpassword')){
       return (<Redirect to="/sustainability"/>);
@@ -37,7 +42,7 @@ class Login extends Component {
               <h1 className="display-3">Login</h1>
               <p className="lead">Enter Password:</p>
               <InputGroup>
-                <Input type="password" name="password" id="password" placeholder="password" value={this.state.password} onChange={e => this.setState({ password: e.target.value })}/>
+                <Input type="password" name="password" id="password" placeholder="password" value={this.state.password} onChange={e => this.setState({ password: e.target.value })} onKeyPress={this.handleKeyPress}/>
                 <InputGroupAddon addonType="append">
                   <Button onClick={this.login}>Log In</Button>
                 </InputGroupAddon>

@@ -3,6 +3,20 @@ import { Label, Input, Button, Collapse, Navbar, NavbarToggler, NavbarBrand, Nav
 import Switch from "react-switch";
 import Plot from 'react-plotly.js';
 import './Home.css';
+import calculateConvexHull from 'geo-convex-hull';
+const colorwheel = [
+    '#1f77b4',  // muted blue
+    '#ff7f0e',  // safety orange
+    '#2ca02c',  // cooked asparagus green
+    '#d62728',  // brick red
+    '#9467bd',  // muted purple
+    '#8c564b',  // chestnut brown
+    '#e377c2',  // raspberry yogurt pink
+    '#7f7f7f',  // middle gray
+    '#bcbd22',  // curry yellow-green
+    '#17becf'   // blue-teal
+];
+
 
 class Graph extends Component {
   constructor(props) {
@@ -18,6 +32,9 @@ class Graph extends Component {
       this.ylogchange = this.ylogchange.bind(this);
       this.checkselected = this.checkselected.bind(this);
       this.toggleNavbar = this.toggleNavbar.bind(this);
+      this.handleSelected = this.handleSelected.bind(this);
+      this.addcircle = this.addcircle.bind(this);
+      this.isvalid = this.isvalid.bind(this);
       this.state = {
           xaxis: "Material Impacts",
           yaxis: "Cost",
@@ -88,6 +105,7 @@ class Graph extends Component {
       collapsed: !this.state.collapsed
     });
   }
+
   changex(event){
     this.setState({xaxis: event.target.value})
   }
@@ -99,9 +117,11 @@ class Graph extends Component {
   massbasedchange(massbased) {
     this.setState({ massbased });
   }
+
   shownamechange(showname){
     this.setState({ showname });
   }
+
   xlogchange(xlog) {
     this.setState({ xlog });
     if (xlog){
@@ -123,10 +143,18 @@ class Graph extends Component {
   processData(data,checked){
       var traces = [];
       var mode = 'markers';
+      var coloridx = 0;
       if (this.state.showname){
         mode = 'markers+text';
       }
-      if (data.length > 0){
+      var size = 0;
+      if (this.state.width < 925){
+        size = this.state.width * 0.01875;
+      }else{
+        size = this.state.width * 0.0075;
+      }
+      if (typeof data !== "undefined" && data.length > 0){
+        //build types
         traces.push({
           x: [],
           y: [],
@@ -135,7 +163,10 @@ class Graph extends Component {
           mode: mode,
           name: data[0]['Type'],
           textposition: 'bottom center',
-          marker: { size: this.state.width * 0.0075 }
+          marker: {
+            size: size,
+            color:colorwheel[coloridx]
+          }
         });
         for (var i = 1; i < data.length ; i++){
           if (data[i]['Type'] !== "" && data[i]['Type'] !== data[i-1]['Type']){
@@ -147,20 +178,22 @@ class Graph extends Component {
               mode: mode,
               name: data[i]['Type'],
               textposition: 'bottom center',
-              marker: { size: this.state.width * 0.0075 }
+              marker: {
+                size: size,
+                color: colorwheel[(++coloridx)%colorwheel.length]
+              }
             });
           }
         }
+        //build datas
         for (var i = 0; i < data.length ; i++){
           if (data[i]['Type'] !== "" &&  checked.includes(data[i]['Name']) && this.checkselected(data[i])){
             for (var j = 0; j < traces.length ; j++){
               if (traces[j]['name'] === data[i]['Type']){
-                if (this.state.massbased && data[i]['Density'] !== 0){
-                  traces[j]['x'].push(data[i][this.state.xaxis]/data[i]['Density']);
-                  traces[j]['y'].push(data[i][this.state.yaxis]/data[i]['Density']);
-                }else{
-                  traces[j]['x'].push(data[i][this.state.xaxis]);
-                  traces[j]['y'].push(data[i][this.state.yaxis]);
+                var valid = this.isvalid(data[i]);
+                if (valid){
+                  traces[j]['x'].push(valid.x);
+                  traces[j]['y'].push(valid.y);
                 }
                 traces[j]['text'].push(data[i]['Name']);
                 break;
@@ -170,6 +203,76 @@ class Graph extends Component {
         }
       }
       return traces;
+  }
+
+  addcircle(traces){
+    var shapes = [];
+    for (var i = 0; i < traces.length ; i++){
+      if(typeof traces[i] !== "undefined" && traces[i]['x'].length > 0 && traces[i]['y'].length > 0){
+        var points = [];
+        for (var j = 0; j < traces[i]['x'].length; j ++){
+          points.push({
+            latitude: traces[i]['x'][j],
+            longitude: traces[i]['y'][j]
+          })
+        }
+        var convexHull = calculateConvexHull(points);
+        if (convexHull.length === 1){//point
+          var shape = {
+              type: 'rect',
+              xref: 'x',
+              yref: 'y',
+              x0: convexHull[0]['latitude']-traces[i]['marker']['size']/3/15,
+              y0: convexHull[0]['longitude']-traces[i]['marker']['size']/3/15,
+              x1: convexHull[0]['latitude']+traces[i]['marker']['size']/3/15,
+              y1: convexHull[0]['longitude']+traces[i]['marker']['size']/3/15,
+              opacity: 0.3,
+              fillcolor: traces[i]['marker']['color'],
+              line: {
+                  width: traces[i]['marker']['size']/3,
+                  color: traces[i]['marker']['color'],
+              },
+          };
+        }else if (convexHull.length === 2){//line
+          var shape = {
+              type: 'rect',
+              xref: 'x',
+              yref: 'y',
+              x0: convexHull[0]['latitude']-traces[i]['marker']['size']/3/15,
+              y0: convexHull[0]['longitude']-traces[i]['marker']['size']/3/15,
+              x1: convexHull[1]['latitude']+traces[i]['marker']['size']/3/15,
+              y1: convexHull[1]['longitude']+traces[i]['marker']['size']/3/15,
+              opacity: 0.3,
+              fillcolor: traces[i]['marker']['color'],
+              line: {
+                  width: traces[i]['marker']['size']/3,
+                  color: traces[i]['marker']['color'],
+              },
+          };
+        }else{//area
+          var path = "M";
+          for (var k = 0; k < convexHull.length ; k++){
+            path += " " + (convexHull[k]['latitude']) + " " + (convexHull[k]['longitude']) +" "
+            if(k < convexHull.length - 1){
+              path += "L"
+            }
+          }
+          path += "Z"
+          var shape = {
+              type: 'path',
+              path: path,
+              opacity: 0.3,
+              fillcolor: traces[i]['marker']['color'],
+              line: {
+                  width: traces[i]['marker']['size']/3,
+                  color: traces[i]['marker']['color'],
+              },
+          };
+        }
+        shapes.push(shape);
+      }
+    }
+    return shapes;
   }
 
   processResult(data,checked){
@@ -184,7 +287,7 @@ class Graph extends Component {
         var disposalvol = [];
         var eolvol = [];
         for (var i = 0; i < data.length ; i++){
-          if (data[i]['Type'] !== "" &&  checked.includes(data[i]['Name']) && this.checkselected(data[i])){
+          if (data[i]['Type'] !== "" &&  checked.includes(data[i]['Name']) && this.checkselected(data[i]) && this.isvalid(data[i])){
             if (data[i]['Density'] !== 0){
               materialmass.push({name:data[i]['Name'],value:data[i]['Material Impacts']/data[i]['Density']});
               costmass.push({name:data[i]['Name'],value:data[i]['Cost']/data[i]['Density']});
@@ -233,6 +336,32 @@ class Graph extends Component {
         }
       }
       return true;
+  }
+
+  handleSelected(obj){
+    var checked = [];
+    var data = obj['points'];
+    for (var i = 0; i < data.length ; i++){
+      checked.push(data[i]['text']);
+    }
+    this.props.updatechecked(checked);
+  }
+
+  isvalid(data){
+    if (this.state.massbased && data['Density'] !== 0){
+      var x = data[this.state.xaxis]/data['Density'];
+      var y = data[this.state.yaxis]/data['Density'];
+      if (this.props.checked.indexOf(data['Name']) > -1){
+        return {x:x,y:y};
+      }
+    }else{
+      var x = data[this.state.xaxis];
+      var y = data[this.state.yaxis];
+      if (this.props.checked.indexOf(data['Name']) > -1){
+        return {x:x,y:y};
+      }
+    }
+    return;
   }
 
   render() {
@@ -311,8 +440,10 @@ class Graph extends Component {
       </Navbar>
 
       <Plot
+        onSelected = {(obj) => this.handleSelected(obj)}
         data = {this.processData(this.props.data,this.props.checked)}
         layout = {{
+          shapes: this.addcircle(this.processData(this.props.data,this.props.checked)),
           autoresize : false,
           width: this.state.graphwidth,
           height:  this.state.graphheight,
@@ -327,14 +458,15 @@ class Graph extends Component {
             showgrid: true,
             zeroline: true,
             type:this.state.xtype,
-            autorange:true,
+            autorange: true,
+            rangeslider: {},
           },
           yaxis:{
             title: {text: this.state.yaxis},
             showgrid: true,
             zeroline: true,
             type: this.state.ytype,
-            autorange:true,
+            autorange: true,
           },
         }}
       />
@@ -344,3 +476,6 @@ class Graph extends Component {
 }
 
 export default Graph;
+//rangeslider: {} onRelayout = {(obj) => this.relayout(obj)}
+//range: [this.state.y0,this.state.y1]
+//
