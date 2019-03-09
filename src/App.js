@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Home from './Home/Home.js';
-import Header from './Header.js';
+import Header from './Common/Header.js';
 import './App.css';
 import Favicon from 'react-favicon';
 import favicon from './assets/favicon.ico'
-import Login from './Login/Login.js'
+import Login from './Common/Login.js'
 import store from 'store';
 
 class App extends Component {
@@ -18,7 +18,6 @@ class App extends Component {
     document.title = "Sustainable Materials Advisor";
   }
   render() {
-    //store.set('password', '' );
     if (store.get('password') === store.get('correctpassword') && typeof store.get('correctpassword') !== "undefined"){
       return(
         <div className="App">

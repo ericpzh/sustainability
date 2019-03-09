@@ -1,11 +1,16 @@
 import React, { Component } from 'react';
-import './Home.css';
-import Filter from './Filter.js';
-import Graph from './Graph.js';
+import './Home3.css';
+import Filter3 from './Filter3.js';
+import Graph3 from './Graph3.js';
 import * as math from 'mathjs';
 import { push as Menu } from 'react-burger-menu';
+import Header from '../Common/Header.js';
+import Favicon from 'react-favicon';
+import favicon from '../assets/favicon.ico'
+import Login from '../Common/Login.js'
+import store from 'store';
 
-class Home extends Component {
+class Home3 extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -32,6 +37,7 @@ class Home extends Component {
   }
 
   componentDidMount() {
+    document.title = "Sustainable Materials Advisor";
     var csvFilePath = require("../assets/Granta.csv");
     var Papa = require("papaparse");
     Papa.parse(csvFilePath, {
@@ -152,23 +158,34 @@ class Home extends Component {
   }
 
   render() {
-    return (
-      <div className="Home">
-        <div id="outer-container">
-          <Menu left width = {this.state.menuwidth} styles={{bmBurgerButton: {display: 'none'}, bmCrossButton: {display: 'none'}} } isOpen={this.state.sidebarOpen} onStateChange={ this.onSetSidebarOpen } disableOverlayClick={this.state.overlay} noOverlay={this.state.overlay} pageWrapId={ "page-wrap" } outerContainerId={ "outer-container" }>
-            <div className="scroll">
-            <Filter data = {this.state.data} checked = {this.state.checked} expanded = {this.state.expanded} onCheck = {this.onCheck} onExpand = {this.onExpand} selected = {this.state.selected} set = {this.setselected}/>
-            </div>
-          </Menu>
-          <main id="page-wrap" style={{}}>
-            <div className="scroll-fix">
-              <Graph data = {this.state.data} checked = {this.state.checked} selected = {this.state.selected} sidebartoggle = {this.sidebartoggle} sidebarOpen = {this.state.sidebarOpen} selectionwidth = {this.state.selectionwidth} modal = {this.state.modal} modaltoggle = {this.modaltoggle} updatechecked = {this.updatechecked}/>
-            </div>
-          </main>
+    if (store.get('password') === store.get('correctpassword') && typeof store.get('correctpassword') !== "undefined"){
+      return(
+        <div className="Home3">
+          <Favicon url={favicon} />
+          <Header/>
+          <div id="outer-container">
+            <Menu left width = {this.state.menuwidth} styles={{bmBurgerButton: {display: 'none'}, bmCrossButton: {display: 'none'}} } isOpen={this.state.sidebarOpen} onStateChange={ this.onSetSidebarOpen } disableOverlayClick={this.state.overlay} noOverlay={this.state.overlay} pageWrapId={ "page-wrap" } outerContainerId={ "outer-container" }>
+              <div className="scroll">
+              <Filter3 data = {this.state.data} checked = {this.state.checked} expanded = {this.state.expanded} onCheck = {this.onCheck} onExpand = {this.onExpand} selected = {this.state.selected} set = {this.setselected}/>
+              </div>
+            </Menu>
+            <main id="page-wrap" style={{}}>
+              <div className="scroll-fix">
+                <Graph3 data = {this.state.data} checked = {this.state.checked} selected = {this.state.selected} sidebartoggle = {this.sidebartoggle} sidebarOpen = {this.state.sidebarOpen} selectionwidth = {this.state.selectionwidth} modal = {this.state.modal} modaltoggle = {this.modaltoggle} updatechecked = {this.updatechecked}/>
+              </div>
+            </main>
+          </div>
         </div>
-      </div>
-    );
+      );
+    }else{
+      return (
+        <div>
+          <Favicon url={favicon} />
+          <Login/>
+        </div>
+      );
+    }
   }
 }
 
-export default Home;
+export default Home3;

@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Label, Input, Button, Collapse, Navbar, NavbarToggler, NavbarBrand, Nav, NavItem, Modal, ModalHeader, ModalBody} from 'reactstrap';
 import Switch from "react-switch";
 import Plot from 'react-plotly.js';
-import './Home.css';
+import './Home3.css';
 import calculateConvexHull from 'geo-convex-hull';
 const colorwheel = [
     '#1f77b4',  // muted blue
@@ -18,7 +18,7 @@ const colorwheel = [
 ];
 
 
-class Graph extends Component {
+class Graph3 extends Component {
   constructor(props) {
       super(props);
       this.updateWindowDimensions = this.updateWindowDimensions.bind(this);
@@ -26,28 +26,32 @@ class Graph extends Component {
       this.processResult = this.processResult.bind(this);
       this.changex = this.changex.bind(this);
       this.changey = this.changey.bind(this);
+      this.changez = this.changez.bind(this);
       this.massbasedchange = this.massbasedchange.bind(this);
       this.shownamechange = this.shownamechange.bind(this);
       this.xlogchange = this.xlogchange.bind(this);
       this.ylogchange = this.ylogchange.bind(this);
+      this.zlogchange = this.zlogchange.bind(this);
       this.checkselected = this.checkselected.bind(this);
       this.toggleNavbar = this.toggleNavbar.bind(this);
       this.handleSelected = this.handleSelected.bind(this);
-      this.addcircle = this.addcircle.bind(this);
       this.isvalid = this.isvalid.bind(this);
       this.state = {
           xaxis: "Lifecycle Impacts",
           yaxis: "Cost",
+          zaxis: "Material Impacts",
           width: window.innerWidth,
           height: window.innerHeight,
           massbased: true,
           showname: false,
           xlog: false,
           ylog: false,
+          zlog: false,
           xtype: '',
           ytype: '',
+          ztype:'',
           showlegend: true,
-          collapsed: false,
+          collapsed: true,
       };
   }
 
@@ -65,7 +69,7 @@ class Graph extends Component {
       this.setState({
         width: window.innerWidth,
         height: window.innerHeight,
-        graphheight : 0.45 * window.innerHeight,
+        graphheight : 0.75 * window.innerHeight,
         graphwidth : 0.75 * window.innerWidth,
        });
     }else{
@@ -79,7 +83,7 @@ class Graph extends Component {
     if(window.innerWidth>700){
       this.setState({
         showlegend: true,
-        collapsed: false,
+        collapsed: true,
       })
     }else{
       this.setState({
@@ -113,6 +117,9 @@ class Graph extends Component {
   changey(event){
     this.setState({yaxis: event.target.value})
   }
+  changez(event){
+    this.setState({zaxis: event.target.value})
+  }
 
   massbasedchange(massbased) {
     this.setState({ massbased });
@@ -139,6 +146,14 @@ class Graph extends Component {
       this.setState({ ytype : '' });
     }
   }
+  zlogchange(zlog) {
+    this.setState({ zlog });
+    if (zlog){
+      this.setState({ ztype : 'log' });
+    }else{
+      this.setState({ ztype : '' });
+    }
+  }
 
   processData(data,checked){
       var traces = [];
@@ -149,17 +164,18 @@ class Graph extends Component {
       }
       var size = 0;
       if (this.state.width < 925){
-        size = this.state.width * 0.01875;
+        size = this.state.width * 0.02;
       }else{
-        size = this.state.width * 0.0075;
+        size = this.state.width * 0.005;
       }
       if (typeof data !== "undefined" && data.length > 0){
         //build types
         traces.push({
           x: [],
           y: [],
+          z: [],
           text: [],
-          type: 'scatter',
+          type: 'scatter3d',
           mode: mode,
           name: data[0]['Type'],
           textposition: 'bottom center',
@@ -167,14 +183,24 @@ class Graph extends Component {
             size: size,
             color:colorwheel[coloridx]
           }
+        },{
+        alphahull: 0,
+        opacity: 0.4,
+        type: 'mesh3d',
+        x: [],
+        y: [],
+        z: [],
+        name: data[0]['Type'],
+        color:colorwheel[coloridx]
         });
         for (var i = 1; i < data.length ; i++){
           if (data[i]['Type'] !== "" && data[i]['Type'] !== data[i-1]['Type']){
             traces.push({
               x: [],
               y: [],
+              z: [],
               text: [],
-              type: 'scatter',
+              type: 'scatter3d',
               mode: mode,
               name: data[i]['Type'],
               textposition: 'bottom center',
@@ -182,6 +208,15 @@ class Graph extends Component {
                 size: size,
                 color: colorwheel[(++coloridx)%colorwheel.length]
               }
+            },{
+            alphahull: 0,
+            opacity: 0.4,
+            type: 'mesh3d',
+            x: [],
+            y: [],
+            z: [],
+            name: data[i]['Type'],
+            color:colorwheel[(++coloridx)%colorwheel.length]
             });
           }
         }
@@ -194,6 +229,10 @@ class Graph extends Component {
                 if (valid){
                   traces[j]['x'].push(valid.x);
                   traces[j]['y'].push(valid.y);
+                  traces[j]['z'].push(valid.z);
+                  traces[j+1]['x'].push(valid.x);
+                  traces[j+1]['y'].push(valid.y);
+                  traces[j+1]['z'].push(valid.z);
                 }
                 traces[j]['text'].push(data[i]['Name']);
                 break;
@@ -203,76 +242,6 @@ class Graph extends Component {
         }
       }
       return traces;
-  }
-
-  addcircle(traces){
-    var shapes = [];
-    for (var i = 0; i < traces.length ; i++){
-      if(typeof traces[i] !== "undefined" && traces[i]['x'].length > 0 && traces[i]['y'].length > 0){
-        var points = [];
-        for (var j = 0; j < traces[i]['x'].length; j ++){
-          points.push({
-            latitude: traces[i]['x'][j],
-            longitude: traces[i]['y'][j]
-          })
-        }
-        var convexHull = calculateConvexHull(points);
-        if (convexHull.length === 1){//point
-          var shape = {
-              type: 'rect',
-              xref: 'x',
-              yref: 'y',
-              x0: convexHull[0]['latitude']-traces[i]['marker']['size']/3/15,
-              y0: convexHull[0]['longitude']-traces[i]['marker']['size']/3/15,
-              x1: convexHull[0]['latitude']+traces[i]['marker']['size']/3/15,
-              y1: convexHull[0]['longitude']+traces[i]['marker']['size']/3/15,
-              opacity: 0.3,
-              fillcolor: traces[i]['marker']['color'],
-              line: {
-                  width: traces[i]['marker']['size']/3,
-                  color: traces[i]['marker']['color'],
-              },
-          };
-        }else if (convexHull.length === 2){//line
-          var shape = {
-              type: 'rect',
-              xref: 'x',
-              yref: 'y',
-              x0: convexHull[0]['latitude']-traces[i]['marker']['size']/3/15,
-              y0: convexHull[0]['longitude']-traces[i]['marker']['size']/3/15,
-              x1: convexHull[1]['latitude']+traces[i]['marker']['size']/3/15,
-              y1: convexHull[1]['longitude']+traces[i]['marker']['size']/3/15,
-              opacity: 0.3,
-              fillcolor: traces[i]['marker']['color'],
-              line: {
-                  width: traces[i]['marker']['size']/3,
-                  color: traces[i]['marker']['color'],
-              },
-          };
-        }else{//area
-          var path = "M";
-          for (var k = 0; k < convexHull.length ; k++){
-            path += " " + (convexHull[k]['latitude']) + " " + (convexHull[k]['longitude']) +" "
-            if(k < convexHull.length - 1){
-              path += "L"
-            }
-          }
-          path += "Z"
-          var shape = {
-              type: 'path',
-              path: path,
-              opacity: 0.3,
-              fillcolor: traces[i]['marker']['color'],
-              line: {
-                  width: traces[i]['marker']['size']/3,
-                  color: traces[i]['marker']['color'],
-              },
-          };
-        }
-        shapes.push(shape);
-      }
-    }
-    return shapes;
   }
 
   processResult(data,checked){
@@ -361,14 +330,16 @@ class Graph extends Component {
     if (this.state.massbased && data['Density'] !== 0){
       var x = data[this.state.xaxis]/data['Density'];
       var y = data[this.state.yaxis]/data['Density'];
+      var z = data[this.state.zaxis]/data['Density'];
       if (this.props.checked.indexOf(data['Name']) > -1){
-        return {x:x,y:y};
+        return {x:x,y:y,z:z};
       }
     }else{
       var x = data[this.state.xaxis];
       var y = data[this.state.yaxis];
+      var z = data[this.state.zaxis];
       if (this.props.checked.indexOf(data['Name']) > -1){
-        return {x:x,y:y};
+        return {x:x,y:y,z:z};
       }
     }
     return;
@@ -412,6 +383,13 @@ class Graph extends Component {
                   <option>EoL potential</option>
                 </Input>
               </div>
+              <div className = "select-switch">
+                <Label for="exampleSelect" className = "select-switch-title">X-axis Scale</Label>
+                <Label for="exampleSelect" className = "select-switch-front">Normal</Label>
+                <Switch onChange={this.xlogchange} checked={this.state.xlog}  className = "select-switch-center" checkedIcon = {false} uncheckedIcon = {false}/>
+                <Label for="exampleSelect" className = "select-switch-back">Log</Label>
+              </div>
+
               <div className = "select-axis">
                 <Label for="exampleSelect" className = "select-axis-item">Select Y axis:</Label>
                 <Input type="select" placeholder="y axis" name="yselect" id="ySelect" className = "select-axis-item" value={this.state.yaxis} onChange={this.changey}>
@@ -421,6 +399,29 @@ class Graph extends Component {
                   <option>Disposal Impacts</option>
                   <option>EoL potential</option>
                 </Input>
+            </div>
+            <div className = "select-switch">
+              <Label for="exampleSelect" className = "select-switch-title">Y-axis Scale</Label>
+              <Label for="exampleSelect" className = "select-switch-front">Normal</Label>
+              <Switch onChange={this.ylogchange} checked={this.state.ylog}  className = "select-switch-center" checkedIcon = {false} uncheckedIcon = {false}/>
+              <Label for="exampleSelect" className = "select-switch-back">Log</Label>
+            </div>
+
+            <div className = "select-axis">
+              <Label for="exampleSelect" className = "select-axis-item">Select Z axis:</Label>
+              <Input type="select" placeholder="z axis" name="zselect" id="zSelect" className = "select-axis-item" value={this.state.zaxis} onChange={this.changez}>
+                <option>Lifecycle Impacts</option>
+                <option>Material Impacts</option>
+                <option>Cost</option>
+                <option>Disposal Impacts</option>
+                <option>EoL potential</option>
+              </Input>
+            </div>
+            <div className = "select-switch">
+              <Label for="exampleSelect" className = "select-switch-title">Z-axis Scale</Label>
+              <Label for="exampleSelect" className = "select-switch-front">Normal</Label>
+              <Switch onChange={this.zlogchange} checked={this.state.zlog}  className = "select-switch-center" checkedIcon = {false} uncheckedIcon = {false}/>
+              <Label for="exampleSelect" className = "select-switch-back">Log</Label>
             </div>
 
             <div className = "select-switch">
@@ -435,53 +436,74 @@ class Graph extends Component {
               <Switch onChange={this.shownamechange} checked={this.state.showname}  className = "select-switch-center" checkedIcon = {false} uncheckedIcon = {false}/>
               <Label for="exampleSelect" className = "select-switch-back">Show</Label>
             </div>
-
-            <div className = "select-switch">
-              <Label for="exampleSelect" className = "select-switch-title">X-axis Scale</Label>
-              <Label for="exampleSelect" className = "select-switch-front">Normal</Label>
-              <Switch onChange={this.xlogchange} checked={this.state.xlog}  className = "select-switch-center" checkedIcon = {false} uncheckedIcon = {false}/>
-              <Label for="exampleSelect" className = "select-switch-back">Log</Label>
-            </div>
-            <div className = "select-switch">
-              <Label for="exampleSelect" className = "select-switch-title">Y-axis Scale</Label>
-              <Label for="exampleSelect" className = "select-switch-front">Normal</Label>
-              <Switch onChange={this.ylogchange} checked={this.state.ylog}  className = "select-switch-center" checkedIcon = {false} uncheckedIcon = {false}/>
-              <Label for="exampleSelect" className = "select-switch-back">Log</Label>
-            </div>
           </NavItem>
         </Nav>
         </Collapse>
       </Navbar>
 
       <Plot
-        onSelected = {(obj) => this.handleSelected(obj)}
         data = {this.processData(this.props.data,this.props.checked)}
         layout = {{
-          shapes: this.addcircle(this.processData(this.props.data,this.props.checked)),
-          autoresize : false,
+          autosize: true,
           width: this.state.graphwidth,
           height:  this.state.graphheight,
           showlegend: this.state.showlegend,
+          scene: {
+              aspectratio: {
+                  x: 1,
+                  y: 1,
+                  z: 1
+              },
+              camera: {
+                  center: {
+                      x: 0,
+                      y: 0,
+                      z: 0
+                  },
+                  eye: {
+                      x: 1.25,
+                      y: 1.25,
+                      z: 1.25
+                  },
+                  up: {
+                      x: 0,
+                      y: 0,
+                      z: 1
+                  }
+              },
+              xaxis: {
+                  zeroline: false,
+                  title: {text: this.state.xaxis},
+                  type: this.state.xtype,
+                  backgroundcolor:"rgb(200, 200, 230)",
+                  gridcolor:"rgb(255, 255, 255)",
+                  showbackground:true,
+                  zerolinecolor:"rgb(0, 0, 0)",
+              },
+              yaxis: {
+                  zeroline: false,
+                  title: {text: this.state.yaxis},
+                  type: this.state.ytype,
+                  backgroundcolor:"rgb(230, 200,230)",
+                  gridcolor:"rgb(255, 255, 255)",
+                  showbackground:true,
+                  zerolinecolor:"rgb(0, 0, 0)",
+              },
+              zaxis: {
+                  zeroline: false,
+                  title: {text: this.state.zaxis},
+                  type: this.state.ztype,
+                  backgroundcolor:"rgb(230, 230,200)",
+                  gridcolor:"rgb(255, 255, 255)",
+                  showbackground:true,
+                  zerolinecolor:"rgb(0, 0, 0)",
+              }
+          },
           font: {
             family: 'Lato',
             size: 16,
             color: 'rgb(100,150,200)'
-          },
-          xaxis:{
-            title: {text: this.state.xaxis},
-            showgrid: true,
-            zeroline: true,
-            type:this.state.xtype,
-            autorange: true,
-            rangeslider: {},
-          },
-          yaxis:{
-            title: {text: this.state.yaxis},
-            showgrid: true,
-            zeroline: true,
-            type: this.state.ytype,
-            autorange: true,
-          },
+          }
         }}
       />
       </div>
@@ -489,4 +511,5 @@ class Graph extends Component {
   }
 }
 
-export default Graph;
+export default Graph3;
+//onSelected = {(obj) => this.handleSelected(obj)}
