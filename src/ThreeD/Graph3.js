@@ -92,7 +92,6 @@ class Graph3 extends Component {
     }
   }
 
-
   toggleNavbar() {
     var collapsed = this.state.collapsed;
     if (collapsed){
@@ -194,6 +193,7 @@ class Graph3 extends Component {
         });
         for (var i = 1; i < data.length ; i++){
           if (data[i]['Type'] !== "" && data[i]['Type'] !== data[i-1]['Type']){
+            coloridx ++;
             traces.push({
               x: [],
               y: [],
@@ -205,7 +205,7 @@ class Graph3 extends Component {
               textposition: 'bottom center',
               marker: {
                 size: size,
-                color: colorwheel[(++coloridx)%colorwheel.length]
+                color: colorwheel[(coloridx)%colorwheel.length]
               }
             },{
             alphahull: 0,
@@ -215,8 +215,8 @@ class Graph3 extends Component {
             y: [],
             z: [],
             name: data[i]['Type'],
-            color:colorwheel[(++coloridx)%colorwheel.length]
-            });
+            color:colorwheel[(coloridx)%colorwheel.length]
+            });      
           }
         }
         //build datas
