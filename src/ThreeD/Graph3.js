@@ -3,7 +3,6 @@ import { Label, Input, Button, Collapse, Navbar, NavbarToggler, NavbarBrand, Nav
 import Switch from "react-switch";
 import Plot from 'react-plotly.js';
 import './Home3.css';
-import calculateConvexHull from 'geo-convex-hull';
 const colorwheel = [
     '#1f77b4',  // muted blue
     '#ff7f0e',  // safety orange
@@ -164,7 +163,7 @@ class Graph3 extends Component {
       }
       var size = 0;
       if (this.state.width < 925){
-        size = this.state.width * 0.02;
+        size = this.state.width * 0.015;
       }else{
         size = this.state.width * 0.005;
       }

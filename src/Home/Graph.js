@@ -4,6 +4,7 @@ import Switch from "react-switch";
 import Plot from 'react-plotly.js';
 import './Home.css';
 import calculateConvexHull from 'geo-convex-hull';
+
 const colorwheel = [
     '#1f77b4',  // muted blue
     '#ff7f0e',  // safety orange
@@ -33,7 +34,7 @@ class Graph extends Component {
       this.checkselected = this.checkselected.bind(this);
       this.toggleNavbar = this.toggleNavbar.bind(this);
       this.handleSelected = this.handleSelected.bind(this);
-      this.addcircle = this.addcircle.bind(this);
+      this.addshapes = this.addshapes.bind(this);
       this.isvalid = this.isvalid.bind(this);
       this.state = {
           xaxis: "Lifecycle Impacts",
@@ -114,15 +115,15 @@ class Graph extends Component {
     this.setState({yaxis: event.target.value})
   }
 
-  massbasedchange(massbased) {
+  massbasedchange(massbased) {//mass/vol switch
     this.setState({ massbased });
   }
 
-  shownamechange(showname){
+  shownamechange(showname){//name/noname switch
     this.setState({ showname });
   }
 
-  xlogchange(xlog) {
+  xlogchange(xlog) {//x log switch
     this.setState({ xlog });
     if (xlog){
       this.setState({ xtype : 'log' });
@@ -131,7 +132,7 @@ class Graph extends Component {
 
     }
   }
-  ylogchange(ylog) {
+  ylogchange(ylog) {//y log switch
     this.setState({ ylog });
     if (ylog){
       this.setState({ ytype : 'log' });
@@ -140,7 +141,7 @@ class Graph extends Component {
     }
   }
 
-  processData(data,checked){
+  processData(data,checked){//build scatter points
       var traces = [];
       var mode = 'markers';
       var coloridx = 0;
@@ -205,7 +206,7 @@ class Graph extends Component {
       return traces;
   }
 
-  addcircle(traces){
+  addshapes(traces){//calculate & apply backgroud shapes
     var shapes = [];
     for (var i = 0; i < traces.length ; i++){
       if(typeof traces[i] !== "undefined" && traces[i]['x'].length > 0 && traces[i]['y'].length > 0){
@@ -217,15 +218,15 @@ class Graph extends Component {
           })
         }
         var convexHull = calculateConvexHull(points);
-        if (convexHull.length === 1){//point
+        if (traces[i]['x'].length === 1){//point
           var shape = {
               type: 'rect',
               xref: 'x',
               yref: 'y',
-              x0: convexHull[0]['latitude']-traces[i]['marker']['size']/3/15,
-              y0: convexHull[0]['longitude']-traces[i]['marker']['size']/3/15,
-              x1: convexHull[0]['latitude']+traces[i]['marker']['size']/3/15,
-              y1: convexHull[0]['longitude']+traces[i]['marker']['size']/3/15,
+              x0: traces[i]['x'][0]-traces[i]['marker']['size']/3/15,
+              y0: traces[i]['y'][0]-traces[i]['marker']['size']/3/15,
+              x1: traces[i]['x'][0]+traces[i]['marker']['size']/3/15,
+              y1: traces[i]['y'][0]+traces[i]['marker']['size']/3/15,
               opacity: 0.3,
               fillcolor: traces[i]['marker']['color'],
               line: {
@@ -233,15 +234,84 @@ class Graph extends Component {
                   color: traces[i]['marker']['color'],
               },
           };
-        }else if (convexHull.length === 2){//line
+        }else if (traces[i]['x'].length === 2){//line
+          var paths = [];
+          var x0 = traces[i]['x'][0];
+          var y0 = traces[i]['y'][0];
+          var x1 = traces[i]['x'][1];
+          var y1 = traces[i]['y'][1];
+          var xm = (x1 + x0)/2;
+          var ym = (y1 + y0)/2;
+          var l = traces[i]['marker']['size']/3/5; //length
+          if (y1 - y0 == 0){
+            paths.push({
+              latitude: x0,
+              longitude: y0
+            });
+            paths.push({
+              latitude: xm,
+              longitude: ym-l
+            });
+            paths.push({
+              latitude: x1,
+              longitude: y1
+            });
+            paths.push({
+              latitude: xm,
+              longitude: ym+l
+            });
+          }else if(x1 - x0 == 0){
+            paths.push({
+              latitude: x0,
+              longitude: y0
+            });
+            paths.push({
+              latitude: xm-l,
+              longitude: ym
+            });
+            paths.push({
+              latitude: x1,
+              longitude: y1
+            });
+            paths.push({
+              latitude: xm+l,
+              longitude: ym
+            });
+          }else{
+            var slope = (y1 - y0)/(x1 - x0);
+            var k = -1/slope;
+            var x2 = l/Math.sqrt(k*k+1) + xm;
+            var y2 = k*l/Math.sqrt(k*k+1) + ym;
+            var x3 = -l/Math.sqrt(k*k+1) + xm;
+            var y3 = -k*l/Math.sqrt(k*k+1) + ym;
+            paths.push({
+              latitude: x0,
+              longitude: y0
+            });
+            paths.push({
+              latitude: x2,
+              longitude: y2
+            });
+            paths.push({
+              latitude: x1,
+              longitude: y1
+            });
+            paths.push({
+              latitude: x3,
+              longitude: y3
+            });
+          }
+          var path = "M";
+          for (var k = 0; k < paths.length ; k++){
+            path += " " + (paths[k]['latitude']) + " " + (paths[k]['longitude']) +" "
+            if(k < paths.length - 1){
+              path += "L"
+            }
+          }
+          path += "Z"
           var shape = {
-              type: 'rect',
-              xref: 'x',
-              yref: 'y',
-              x0: convexHull[0]['latitude']-traces[i]['marker']['size']/3/15,
-              y0: convexHull[0]['longitude']-traces[i]['marker']['size']/3/15,
-              x1: convexHull[1]['latitude']+traces[i]['marker']['size']/3/15,
-              y1: convexHull[1]['longitude']+traces[i]['marker']['size']/3/15,
+              type: 'path',
+              path: path,
               opacity: 0.3,
               fillcolor: traces[i]['marker']['color'],
               line: {
@@ -275,7 +345,7 @@ class Graph extends Component {
     return shapes;
   }
 
-  processResult(data,checked){
+  processResult(data,checked){//result modal data
       var result= {MaterialMass:'',CostMass:'',DisposalMass:'',EoLMass:'',LCMass:'',MaterialVol:'',CostVol:'',DisposalVol:'',EoLVol:'',LCVol:''};
       if (data.length > 0 && checked.length > 0){
         var materialmass = [];
@@ -338,7 +408,7 @@ class Graph extends Component {
       return result;
   }
 
-  checkselected(obj){
+  checkselected(obj){// check preset filter
       var selected = this.props.selected;
       for (var i = 0; i < selected.length ; i++){
         if (obj[selected[i]] == 0){
@@ -348,16 +418,21 @@ class Graph extends Component {
       return true;
   }
 
-  handleSelected(obj){
+  handleSelected(obj){// update parent.state.chekced
     var checked = [];
-    var data = obj['points'];
-    for (var i = 0; i < data.length ; i++){
-      checked.push(data[i]['text']);
+    try{
+      var data = obj['points'];
+      for (var i = 0; i < data.length ; i++){
+        checked.push(data[i]['text']);
+      }
+      this.props.updatechecked(checked);
     }
-    this.props.updatechecked(checked);
+    catch(err) {
+      console.log(err);
+    }
   }
 
-  isvalid(data){
+  isvalid(data){//check tree&range
     if (this.state.massbased && data['Density'] !== 0){
       var x = data[this.state.xaxis]/data['Density'];
       var y = data[this.state.yaxis]/data['Density'];
@@ -457,7 +532,7 @@ class Graph extends Component {
         onSelected = {(obj) => this.handleSelected(obj)}
         data = {this.processData(this.props.data,this.props.checked)}
         layout = {{
-          shapes: this.addcircle(this.processData(this.props.data,this.props.checked)),
+          shapes: this.addshapes(this.processData(this.props.data,this.props.checked)),
           autoresize : false,
           width: this.state.graphwidth,
           height:  this.state.graphheight,
