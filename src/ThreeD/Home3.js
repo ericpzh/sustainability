@@ -38,6 +38,10 @@ class Home3 extends Component {
 
   componentDidMount() {
     document.title = "Sustainable Materials Advisor";
+    const styleLink = document.createElement("link");
+    styleLink.rel = "stylesheet";
+    styleLink.href = "https://cdn.jsdelivr.net/npm/semantic-ui/dist/semantic.min.css";
+    document.head.appendChild(styleLink);
     var csvFilePath = require("../assets/Granta.csv");
     var Papa = require("papaparse");
     Papa.parse(csvFilePath, {

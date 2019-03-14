@@ -16,6 +16,10 @@ class App extends Component {
   }
   componentDidMount(){
     document.title = "Sustainable Materials Advisor";
+    const styleLink = document.createElement("link");
+    styleLink.rel = "stylesheet";
+    styleLink.href = "https://cdn.jsdelivr.net/npm/semantic-ui/dist/semantic.min.css";
+    document.head.appendChild(styleLink);
   }
   render() {
     if (store.get('password') === store.get('correctpassword') && typeof store.get('correctpassword') !== "undefined"){
@@ -36,5 +40,7 @@ class App extends Component {
     }
   }
 }
+
+
 
 export default App;

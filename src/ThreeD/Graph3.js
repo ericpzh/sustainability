@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Label, Input, Button, Collapse, Navbar, NavbarToggler, NavbarBrand, Nav, NavItem, Modal, ModalHeader, ModalBody} from 'reactstrap';
-import Switch from "react-switch";
+import { Button as Button2, Dropdown, Menu} from 'semantic-ui-react';
 import Plot from 'react-plotly.js';
 import './Home3.css';
 const colorwheel = [
@@ -26,11 +26,6 @@ class Graph3 extends Component {
       this.changex = this.changex.bind(this);
       this.changey = this.changey.bind(this);
       this.changez = this.changez.bind(this);
-      this.massbasedchange = this.massbasedchange.bind(this);
-      this.shownamechange = this.shownamechange.bind(this);
-      this.xlogchange = this.xlogchange.bind(this);
-      this.ylogchange = this.ylogchange.bind(this);
-      this.zlogchange = this.zlogchange.bind(this);
       this.checkselected = this.checkselected.bind(this);
       this.toggleNavbar = this.toggleNavbar.bind(this);
       this.handleSelected = this.handleSelected.bind(this);
@@ -51,6 +46,7 @@ class Graph3 extends Component {
           ztype:'',
           showlegend: true,
           collapsed: true,
+          shapeoption: 0, //0:none, 1: convexhull
       };
   }
 
@@ -119,39 +115,6 @@ class Graph3 extends Component {
     this.setState({zaxis: event.target.value})
   }
 
-  massbasedchange(massbased) {
-    this.setState({ massbased });
-  }
-
-  shownamechange(showname){
-    this.setState({ showname });
-  }
-
-  xlogchange(xlog) {
-    this.setState({ xlog });
-    if (xlog){
-      this.setState({ xtype : 'log' });
-    }else{
-      this.setState({ xtype : '' });
-
-    }
-  }
-  ylogchange(ylog) {
-    this.setState({ ylog });
-    if (ylog){
-      this.setState({ ytype : 'log' });
-    }else{
-      this.setState({ ytype : '' });
-    }
-  }
-  zlogchange(zlog) {
-    this.setState({ zlog });
-    if (zlog){
-      this.setState({ ztype : 'log' });
-    }else{
-      this.setState({ ztype : '' });
-    }
-  }
 
   processData(data,checked){
       var traces = [];
@@ -165,6 +128,10 @@ class Graph3 extends Component {
         size = this.state.width * 0.015;
       }else{
         size = this.state.width * 0.005;
+      }
+      var opacity = 0.4;
+      if (this.state.shapeoption === 0){
+        opacity = 0;
       }
       if (typeof data !== "undefined" && data.length > 0){
         //build types
@@ -183,7 +150,7 @@ class Graph3 extends Component {
           }
         },{
         alphahull: 0,
-        opacity: 0.4,
+        opacity: opacity,
         type: 'mesh3d',
         x: [],
         y: [],
@@ -209,14 +176,14 @@ class Graph3 extends Component {
               }
             },{
             alphahull: 0,
-            opacity: 0.4,
+            opacity: opacity,
             type: 'mesh3d',
             x: [],
             y: [],
             z: [],
             name: data[i]['Type'],
             color:colorwheel[(coloridx)%colorwheel.length]
-            });      
+            });
           }
         }
         //build datas
@@ -372,68 +339,100 @@ class Graph3 extends Component {
         <Collapse isOpen={!this.state.collapsed} navbar>
           <Nav navbar>
             <NavItem className = "selectcontainer">
-              <div className = "select-axis">
-                <Label for="exampleSelect" className = "select-axis-item">Select X axis:</Label>
-                <Input type="select" placeholder="x axis" name="xselect" id="xSelect" className = "select-axis-item" value={this.state.xaxis} onChange={this.changex}>
-                  <option>Lifecycle Impacts</option>
-                  <option>Material Impacts</option>
-                  <option>Cost</option>
-                  <option>Disposal Impacts</option>
-                  <option>EoL potential</option>
-                </Input>
+              <div className = "select-item">
+                <Menu fluid>
+                  <Menu.Item header fluid>Select X-axis:</Menu.Item>
+                  <Dropdown
+                    placeholder='X-Axis'
+                    value = {this.state.xaxis}
+                    onChange = {(e, { value }) => this.setState({ xaxis: value })}
+                    fluid
+                    selection
+                    options={[
+                      {text:"Lifecycle Impacts(kgCO2-eq)",value:"Lifecycle Impacts"},
+                      {text:"Material Impacts(kgCO2-eq)",value:"Material Impacts"},
+                      {text:"Cost($)",value:"Cost"},
+                      {text:"Disposal Impacts(kgCO2-eq)",value:"Disposal Impacts"},
+                      {text:"EoL potential(kgCO2-eq)",value:"EoL potential"},
+                    ]}
+                  />
+                </Menu>
               </div>
-              <div className = "select-switch">
-                <Label for="exampleSelect" className = "select-switch-title">X-axis Scale</Label>
-                <Label for="exampleSelect" className = "select-switch-front">Normal</Label>
-                <Switch onChange={this.xlogchange} checked={this.state.xlog}  className = "select-switch-center" checkedIcon = {false} uncheckedIcon = {false}/>
-                <Label for="exampleSelect" className = "select-switch-back">Log</Label>
+              <div className = "select-item">
+                <Button2.Group fluid>
+                  <Button2 active={!this.state.xlog}  onClick={()=>this.setState({xlog:false,xtype:''})}>X-axis: Normal</Button2>
+                  <Button2.Or text="X"/>
+                  <Button2 active={this.state.xlog}  onClick={()=>this.setState({xlog:true,xtype:'log'})}>X-axis: Log</Button2>
+                </Button2.Group>
               </div>
 
-              <div className = "select-axis">
-                <Label for="exampleSelect" className = "select-axis-item">Select Y axis:</Label>
-                <Input type="select" placeholder="y axis" name="yselect" id="ySelect" className = "select-axis-item" value={this.state.yaxis} onChange={this.changey}>
-                  <option>Lifecycle Impacts</option>
-                  <option>Material Impacts</option>
-                  <option>Cost</option>
-                  <option>Disposal Impacts</option>
-                  <option>EoL potential</option>
-                </Input>
+              <div className = "select-item">
+                <Menu fluid>
+                  <Menu.Item header fluid>Select Y-axis:</Menu.Item>
+                  <Dropdown
+                    placeholder='Y-Axis'
+                    value = {this.state.yaxis}
+                    onChange = {(e, { value }) => this.setState({ yaxis: value })}
+                    fluid
+                    selection
+                    options={[
+                      {text:"Lifecycle Impacts(kgCO2-eq)",value:"Lifecycle Impacts"},
+                      {text:"Material Impacts(kgCO2-eq)",value:"Material Impacts"},
+                      {text:"Cost($)",value:"Cost"},
+                      {text:"Disposal Impacts(kgCO2-eq)",value:"Disposal Impacts"},
+                      {text:"EoL potential(kgCO2-eq)",value:"EoL potential"},
+                    ]}
+                  />
+                </Menu>
             </div>
-            <div className = "select-switch">
-              <Label for="exampleSelect" className = "select-switch-title">Y-axis Scale</Label>
-              <Label for="exampleSelect" className = "select-switch-front">Normal</Label>
-              <Switch onChange={this.ylogchange} checked={this.state.ylog}  className = "select-switch-center" checkedIcon = {false} uncheckedIcon = {false}/>
-              <Label for="exampleSelect" className = "select-switch-back">Log</Label>
-            </div>
-
-            <div className = "select-axis">
-              <Label for="exampleSelect" className = "select-axis-item">Select Z axis:</Label>
-              <Input type="select" placeholder="z axis" name="zselect" id="zSelect" className = "select-axis-item" value={this.state.zaxis} onChange={this.changez}>
-                <option>Lifecycle Impacts</option>
-                <option>Material Impacts</option>
-                <option>Cost</option>
-                <option>Disposal Impacts</option>
-                <option>EoL potential</option>
-              </Input>
-            </div>
-            <div className = "select-switch">
-              <Label for="exampleSelect" className = "select-switch-title">Z-axis Scale</Label>
-              <Label for="exampleSelect" className = "select-switch-front">Normal</Label>
-              <Switch onChange={this.zlogchange} checked={this.state.zlog}  className = "select-switch-center" checkedIcon = {false} uncheckedIcon = {false}/>
-              <Label for="exampleSelect" className = "select-switch-back">Log</Label>
+            <div className = "select-item">
+              <Button2.Group fluid>
+                <Button2 active={!this.state.ylog}  onClick={()=>this.setState({ylog:false,ytype:''})}>Y-axis: Normal</Button2>
+                <Button2.Or text="Y"/>
+                <Button2 active={this.state.ylog}  onClick={()=>this.setState({ylog:true,ytype:'log'})}>Y-axis: Log</Button2>
+              </Button2.Group>
             </div>
 
-            <div className = "select-switch">
-              <Label for="exampleSelect" className = "select-switch-title">Display Methods</Label>
-              <Label for="exampleSelect" className = "select-switch-front">Per Volume</Label>
-              <Switch onChange={this.massbasedchange} checked={this.state.massbased}  className = "select-switch-center" checkedIcon = {false} uncheckedIcon = {false}/>
-              <Label for="exampleSelect" className = "select-switch-back">Per Mass</Label>
+            <div className = "select-item">
+              <Menu fluid>
+                <Menu.Item header fluid>Select Z-axis:</Menu.Item>
+                <Dropdown
+                  placeholder='Z-Axis'
+                  value = {this.state.zaxis}
+                  onChange = {(e, { value }) => this.setState({ zaxis: value })}
+                  fluid
+                  selection
+                  options={[
+                    {text:"Lifecycle Impacts(kgCO2-eq)",value:"Lifecycle Impacts"},
+                    {text:"Material Impacts(kgCO2-eq)",value:"Material Impacts"},
+                    {text:"Cost($)",value:"Cost"},
+                    {text:"Disposal Impacts(kgCO2-eq)",value:"Disposal Impacts"},
+                    {text:"EoL potential(kgCO2-eq)",value:"EoL potential"},
+                  ]}
+                />
+              </Menu>
             </div>
-            <div className = "select-switch">
-              <Label for="exampleSelect" className = "select-switch-title">Material Name</Label>
-              <Label for="exampleSelect" className = "select-switch-front">Hide</Label>
-              <Switch onChange={this.shownamechange} checked={this.state.showname}  className = "select-switch-center" checkedIcon = {false} uncheckedIcon = {false}/>
-              <Label for="exampleSelect" className = "select-switch-back">Show</Label>
+            <div className = "select-item">
+              <Button2.Group fluid>
+                <Button2 active={!this.state.zlog}  onClick={()=>this.setState({zlog:false,ztype:''})}>Z-axis: Normal</Button2>
+                <Button2.Or text="Z"/>
+                <Button2 active={this.state.zlog}  onClick={()=>this.setState({zlog:true,ztype:'log'})}>Z-axis: Log</Button2>
+              </Button2.Group>
+            </div>
+
+            <div className = "select-item">
+              <Button2.Group fluid>
+                <Button2 active={this.state.shapeoption===0} onClick={()=>this.setState({shapeoption:0})}>None</Button2>
+                <Button2.Or />
+                <Button2 active={this.state.shapeoption===1} onClick={()=>this.setState({shapeoption:1})}>Convex Hull</Button2>
+              </Button2.Group>
+            </div>
+            <div className = "select-item">
+              <Button2.Group fluid>
+                <Button2 active={!this.state.showname} onClick={()=>this.setState({showname:false})}>Hide Name</Button2>
+                <Button2.Or />
+                <Button2 active={this.state.showname} onClick={()=>this.setState({showname:true})}>Display Name</Button2>
+              </Button2.Group>
             </div>
           </NavItem>
         </Nav>
@@ -452,23 +451,6 @@ class Graph3 extends Component {
                   x: 1,
                   y: 1,
                   z: 1
-              },
-              camera: {
-                  center: {
-                      x: 0,
-                      y: 0,
-                      z: 0
-                  },
-                  eye: {
-                      x: 1.25,
-                      y: 1.25,
-                      z: 1.25
-                  },
-                  up: {
-                      x: 0,
-                      y: 0,
-                      z: 1
-                  }
               },
               xaxis: {
                   zeroline: false,

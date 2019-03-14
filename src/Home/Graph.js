@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Label, Input, Button, Collapse, Navbar, NavbarToggler, NavbarBrand, Nav, NavItem, Modal, ModalHeader, ModalBody} from 'reactstrap';
-import Switch from "react-switch";
+import { Button as Button2 , Dropdown, Menu} from 'semantic-ui-react';
 import Plot from 'react-plotly.js';
 import './Home.css';
 import calculateConvexHull from 'geo-convex-hull';
@@ -27,10 +27,6 @@ class Graph extends Component {
       this.processResult = this.processResult.bind(this);
       this.changex = this.changex.bind(this);
       this.changey = this.changey.bind(this);
-      this.massbasedchange = this.massbasedchange.bind(this);
-      this.shownamechange = this.shownamechange.bind(this);
-      this.xlogchange = this.xlogchange.bind(this);
-      this.ylogchange = this.ylogchange.bind(this);
       this.checkselected = this.checkselected.bind(this);
       this.toggleNavbar = this.toggleNavbar.bind(this);
       this.handleSelected = this.handleSelected.bind(this);
@@ -49,6 +45,7 @@ class Graph extends Component {
           ytype: '',
           showlegend: true,
           collapsed: false,
+          shapeoption: 0, //0:none, 1:convenHull, 2:big radius
       };
   }
 
@@ -66,7 +63,7 @@ class Graph extends Component {
       this.setState({
         width: window.innerWidth,
         height: window.innerHeight,
-        graphheight : 0.45 * window.innerHeight,
+        graphheight : 0.55 * window.innerHeight,
         graphwidth : 0.75 * window.innerWidth,
        });
     }else{
@@ -95,7 +92,7 @@ class Graph extends Component {
     var collapsed = this.state.collapsed;
     if (collapsed){
       this.setState({
-        graphheight : 0.45 * window.innerHeight,
+        graphheight : 0.55 * window.innerHeight,
        });
     }else{
       this.setState({
@@ -113,32 +110,6 @@ class Graph extends Component {
 
   changey(event){
     this.setState({yaxis: event.target.value})
-  }
-
-  massbasedchange(massbased) {//mass/vol switch
-    this.setState({ massbased });
-  }
-
-  shownamechange(showname){//name/noname switch
-    this.setState({ showname });
-  }
-
-  xlogchange(xlog) {//x log switch
-    this.setState({ xlog });
-    if (xlog){
-      this.setState({ xtype : 'log' });
-    }else{
-      this.setState({ xtype : '' });
-
-    }
-  }
-  ylogchange(ylog) {//y log switch
-    this.setState({ ylog });
-    if (ylog){
-      this.setState({ ytype : 'log' });
-    }else{
-      this.setState({ ytype : '' });
-    }
   }
 
   processData(data,checked){//build scatter points
@@ -208,138 +179,159 @@ class Graph extends Component {
 
   addshapes(traces){//calculate & apply backgroud shapes
     var shapes = [];
-    for (var i = 0; i < traces.length ; i++){
-      if(typeof traces[i] !== "undefined" && traces[i]['x'].length > 0 && traces[i]['y'].length > 0){
-        var points = [];
-        for (var j = 0; j < traces[i]['x'].length; j ++){
-          points.push({
-            latitude: traces[i]['x'][j],
-            longitude: traces[i]['y'][j]
-          })
-        }
-        var convexHull = calculateConvexHull(points);
-        if (traces[i]['x'].length === 1){//point
-          var shape = {
-              type: 'rect',
-              xref: 'x',
-              yref: 'y',
-              x0: traces[i]['x'][0]-traces[i]['marker']['size']/3/15,
-              y0: traces[i]['y'][0]-traces[i]['marker']['size']/3/15,
-              x1: traces[i]['x'][0]+traces[i]['marker']['size']/3/15,
-              y1: traces[i]['y'][0]+traces[i]['marker']['size']/3/15,
-              opacity: 0.3,
-              fillcolor: traces[i]['marker']['color'],
-              line: {
-                  width: traces[i]['marker']['size']/3,
-                  color: traces[i]['marker']['color'],
-              },
-          };
-        }else if (traces[i]['x'].length === 2){//line
-          var paths = [];
-          var x0 = traces[i]['x'][0];
-          var y0 = traces[i]['y'][0];
-          var x1 = traces[i]['x'][1];
-          var y1 = traces[i]['y'][1];
-          var xm = (x1 + x0)/2;
-          var ym = (y1 + y0)/2;
-          var l = traces[i]['marker']['size']/3/5; //length
-          if (y1 - y0 == 0){
-            paths.push({
-              latitude: x0,
-              longitude: y0
-            });
-            paths.push({
-              latitude: xm,
-              longitude: ym-l
-            });
-            paths.push({
-              latitude: x1,
-              longitude: y1
-            });
-            paths.push({
-              latitude: xm,
-              longitude: ym+l
-            });
-          }else if(x1 - x0 == 0){
-            paths.push({
-              latitude: x0,
-              longitude: y0
-            });
-            paths.push({
-              latitude: xm-l,
-              longitude: ym
-            });
-            paths.push({
-              latitude: x1,
-              longitude: y1
-            });
-            paths.push({
-              latitude: xm+l,
-              longitude: ym
-            });
-          }else{
-            var slope = (y1 - y0)/(x1 - x0);
-            var k = -1/slope;
-            var x2 = l/Math.sqrt(k*k+1) + xm;
-            var y2 = k*l/Math.sqrt(k*k+1) + ym;
-            var x3 = -l/Math.sqrt(k*k+1) + xm;
-            var y3 = -k*l/Math.sqrt(k*k+1) + ym;
-            paths.push({
-              latitude: x0,
-              longitude: y0
-            });
-            paths.push({
-              latitude: x2,
-              longitude: y2
-            });
-            paths.push({
-              latitude: x1,
-              longitude: y1
-            });
-            paths.push({
-              latitude: x3,
-              longitude: y3
-            });
+      for (var i = 0; i < traces.length ; i++){
+        if(typeof traces[i] !== "undefined" && traces[i]['x'].length > 0 && traces[i]['y'].length > 0){
+          var points = [];
+          for (var j = 0; j < traces[i]['x'].length; j ++){
+            points.push({
+              latitude: traces[i]['x'][j],
+              longitude: traces[i]['y'][j]
+            })
           }
-          var path = "M";
-          for (var k = 0; k < paths.length ; k++){
-            path += " " + (paths[k]['latitude']) + " " + (paths[k]['longitude']) +" "
-            if(k < paths.length - 1){
-              path += "L"
+          if (this.state.shapeoption === 1){ //convex hull
+            var convexHull = calculateConvexHull(points);
+            if (traces[i]['x'].length === 1){//point
+              var shape = {
+                  type: 'rect',
+                  xref: 'x',
+                  yref: 'y',
+                  x0: traces[i]['x'][0]-traces[i]['marker']['size']/3/15,
+                  y0: traces[i]['y'][0]-traces[i]['marker']['size']/3/15,
+                  x1: traces[i]['x'][0]+traces[i]['marker']['size']/3/15,
+                  y1: traces[i]['y'][0]+traces[i]['marker']['size']/3/15,
+                  opacity: 0.3,
+                  fillcolor: traces[i]['marker']['color'],
+                  line: {
+                      width: traces[i]['marker']['size']/3,
+                      color: traces[i]['marker']['color'],
+                  },
+              };
+            }else if (traces[i]['x'].length === 2){//line
+              var paths = [];
+              var x0 = traces[i]['x'][0];
+              var y0 = traces[i]['y'][0];
+              var x1 = traces[i]['x'][1];
+              var y1 = traces[i]['y'][1];
+              var xm = (x1 + x0)/2;
+              var ym = (y1 + y0)/2;
+              var l = traces[i]['marker']['size']/3/5; //length
+              if (y1 - y0 == 0){
+                paths.push({
+                  latitude: x0,
+                  longitude: y0
+                });
+                paths.push({
+                  latitude: xm,
+                  longitude: ym-l
+                });
+                paths.push({
+                  latitude: x1,
+                  longitude: y1
+                });
+                paths.push({
+                  latitude: xm,
+                  longitude: ym+l
+                });
+              }else if(x1 - x0 == 0){
+                paths.push({
+                  latitude: x0,
+                  longitude: y0
+                });
+                paths.push({
+                  latitude: xm-l,
+                  longitude: ym
+                });
+                paths.push({
+                  latitude: x1,
+                  longitude: y1
+                });
+                paths.push({
+                  latitude: xm+l,
+                  longitude: ym
+                });
+              }else{
+                var slope = (y1 - y0)/(x1 - x0);
+                var k = -1/slope;
+                var x2 = l/Math.sqrt(k*k+1) + xm;
+                var y2 = k*l/Math.sqrt(k*k+1) + ym;
+                var x3 = -l/Math.sqrt(k*k+1) + xm;
+                var y3 = -k*l/Math.sqrt(k*k+1) + ym;
+                paths.push({
+                  latitude: x0,
+                  longitude: y0
+                });
+                paths.push({
+                  latitude: x2,
+                  longitude: y2
+                });
+                paths.push({
+                  latitude: x1,
+                  longitude: y1
+                });
+                paths.push({
+                  latitude: x3,
+                  longitude: y3
+                });
+              }
+              var path = "M";
+              for (var k = 0; k < paths.length ; k++){
+                path += " " + (paths[k]['latitude']) + " " + (paths[k]['longitude']) +" "
+                if(k < paths.length - 1){
+                  path += "L"
+                }
+              }
+              path += "Z"
+              var shape = {
+                  type: 'path',
+                  path: path,
+                  opacity: 0.3,
+                  fillcolor: traces[i]['marker']['color'],
+                  line: {
+                      width: traces[i]['marker']['size']/3,
+                      color: traces[i]['marker']['color'],
+                  },
+              };
+            }else{//area
+              var path = "M";
+              for (var k = 0; k < convexHull.length ; k++){
+                path += " " + (convexHull[k]['latitude']) + " " + (convexHull[k]['longitude']) +" "
+                if(k < convexHull.length - 1){
+                  path += "L"
+                }
+              }
+              path += "Z"
+              var shape = {
+                  type: 'path',
+                  path: path,
+                  opacity: 0.3,
+                  fillcolor: traces[i]['marker']['color'],
+                  line: {
+                      width: traces[i]['marker']['size']/3,
+                      color: traces[i]['marker']['color'],
+                  },
+              };
             }
+            shapes.push(shape);
+        }else if(this.state.shapeoption === 2){//circle
+          for (var j = 0; j < traces[i]['x'].length ; j++){
+            var shape = {
+                type: 'circle',
+                xref: 'x',
+                yref: 'y',
+                x0: traces[i]['x'][j]-traces[i]['marker']['size']/3/6,
+                y0: traces[i]['y'][j]-traces[i]['marker']['size']/3/6,
+                x1: traces[i]['x'][j]+traces[i]['marker']['size']/3/6,
+                y1: traces[i]['y'][j]+traces[i]['marker']['size']/3/6,
+                opacity: 0.1,
+                fillcolor: traces[i]['marker']['color'],
+                line: {
+                    width: traces[i]['marker']['size']/3,
+                    color: traces[i]['marker']['color'],
+                },
+            };
+            shapes.push(shape);
           }
-          path += "Z"
-          var shape = {
-              type: 'path',
-              path: path,
-              opacity: 0.3,
-              fillcolor: traces[i]['marker']['color'],
-              line: {
-                  width: traces[i]['marker']['size']/3,
-                  color: traces[i]['marker']['color'],
-              },
-          };
-        }else{//area
-          var path = "M";
-          for (var k = 0; k < convexHull.length ; k++){
-            path += " " + (convexHull[k]['latitude']) + " " + (convexHull[k]['longitude']) +" "
-            if(k < convexHull.length - 1){
-              path += "L"
-            }
-          }
-          path += "Z"
-          var shape = {
-              type: 'path',
-              path: path,
-              opacity: 0.3,
-              fillcolor: traces[i]['marker']['color'],
-              line: {
-                  width: traces[i]['marker']['size']/3,
-                  color: traces[i]['marker']['color'],
-              },
-          };
         }
-        shapes.push(shape);
       }
     }
     return shapes;
@@ -477,51 +469,75 @@ class Graph extends Component {
         <Collapse isOpen={!this.state.collapsed} navbar>
           <Nav navbar>
             <NavItem className = "selectcontainer">
-              <div className = "select-axis">
-                <Label for="exampleSelect" className = "select-axis-item">Select X axis:</Label>
-                <Input type="select" placeholder="x axis" name="xselect" id="xSelect" className = "select-axis-item" value={this.state.xaxis} onChange={this.changex}>
-                  <option>Lifecycle Impacts</option>
-                  <option>Material Impacts</option>
-                  <option>Cost</option>
-                  <option>Disposal Impacts</option>
-                  <option>EoL potential</option>
-                </Input>
+              <div className = "select-item">
+              <Menu fluid>
+                <Menu.Item header fluid>Select X-axis:</Menu.Item>
+                <Dropdown
+                  placeholder='X-Axis'
+                  value = {this.state.xaxis}
+                  onChange = {(e, { value }) => this.setState({ xaxis: value })}
+                  fluid
+                  selection
+                  options={[
+                    {text:"Lifecycle Impacts(kgCO2-eq)",value:"Lifecycle Impacts"},
+                    {text:"Material Impacts(kgCO2-eq)",value:"Material Impacts"},
+                    {text:"Cost($)",value:"Cost"},
+                    {text:"Disposal Impacts(kgCO2-eq)",value:"Disposal Impacts"},
+                    {text:"EoL potential(kgCO2-eq)",value:"EoL potential"},
+                  ]}
+                />
+              </Menu>
               </div>
-              <div className = "select-axis">
-                <Label for="exampleSelect" className = "select-axis-item">Select Y axis:</Label>
-                <Input type="select" placeholder="y axis" name="yselect" id="ySelect" className = "select-axis-item" value={this.state.yaxis} onChange={this.changey}>
-                  <option>Lifecycle Impacts</option>
-                  <option>Material Impacts</option>
-                  <option>Cost</option>
-                  <option>Disposal Impacts</option>
-                  <option>EoL potential</option>
-                </Input>
+              <div className = "select-item">
+              <Menu fluid>
+                <Menu.Item header fluid>Select Y-axis:</Menu.Item>
+                <Dropdown
+                  placeholder='Y-Axis'
+                  value = {this.state.yaxis}
+                  onChange = {(e, { value }) => this.setState({ yaxis: value })}
+                  fluid
+                  selection
+                  options={[
+                    {text:"Lifecycle Impacts(kgCO2-eq)",value:"Lifecycle Impacts"},
+                    {text:"Material Impacts(kgCO2-eq)",value:"Material Impacts"},
+                    {text:"Cost($)",value:"Cost"},
+                    {text:"Disposal Impacts(kgCO2-eq)",value:"Disposal Impacts"},
+                    {text:"EoL potential(kgCO2-eq)",value:"EoL potential"},
+                  ]}
+                />
+                </Menu>
             </div>
 
-            <div className = "select-switch">
-              <Label for="exampleSelect" className = "select-switch-title">Display Methods</Label>
-              <Label for="exampleSelect" className = "select-switch-front">Per Volume</Label>
-              <Switch onChange={this.massbasedchange} checked={this.state.massbased}  className = "select-switch-center" checkedIcon = {false} uncheckedIcon = {false}/>
-              <Label for="exampleSelect" className = "select-switch-back">Per Mass</Label>
+            <div className = "select-item">
+              <Button2.Group fluid>
+                <Button2 active={!this.state.xlog}  onClick={()=>this.setState({xlog:false,xtype:''})}>X-axis: Normal</Button2>
+                <Button2.Or text="X"/>
+                <Button2 active={this.state.xlog}  onClick={()=>this.setState({xlog:true,xtype:'log'})}>X-axis: Log</Button2>
+              </Button2.Group>
             </div>
-            <div className = "select-switch">
-              <Label for="exampleSelect" className = "select-switch-title">Material Name</Label>
-              <Label for="exampleSelect" className = "select-switch-front">Hide</Label>
-              <Switch onChange={this.shownamechange} checked={this.state.showname}  className = "select-switch-center" checkedIcon = {false} uncheckedIcon = {false}/>
-              <Label for="exampleSelect" className = "select-switch-back">Show</Label>
+            <div className = "select-item">
+              <Button2.Group fluid>
+                <Button2 active={!this.state.ylog}  onClick={()=>this.setState({ylog:false,ytype:''})}>Y-axis: Normal</Button2>
+                <Button2.Or text="Y"/>
+                <Button2 active={this.state.ylog}  onClick={()=>this.setState({ylog:true,ytype:'log'})}>Y-axis: Log</Button2>
+              </Button2.Group>
             </div>
 
-            <div className = "select-switch">
-              <Label for="exampleSelect" className = "select-switch-title">X-axis Scale</Label>
-              <Label for="exampleSelect" className = "select-switch-front">Normal</Label>
-              <Switch onChange={this.xlogchange} checked={this.state.xlog}  className = "select-switch-center" checkedIcon = {false} uncheckedIcon = {false}/>
-              <Label for="exampleSelect" className = "select-switch-back">Log</Label>
+            <div className = "select-item">
+              <Button2.Group fluid>
+                <Button2 active={this.state.shapeoption===0} onClick={()=>this.setState({shapeoption:0})}>None</Button2>
+                <Button2.Or />
+                <Button2 active={this.state.shapeoption===1} onClick={()=>this.setState({shapeoption:1})}>Convex Hull</Button2>
+                <Button2.Or />
+                <Button2 active={this.state.shapeoption===2} onClick={()=>this.setState({shapeoption:2})}>Heat Map</Button2>
+              </Button2.Group>
             </div>
-            <div className = "select-switch">
-              <Label for="exampleSelect" className = "select-switch-title">Y-axis Scale</Label>
-              <Label for="exampleSelect" className = "select-switch-front">Normal</Label>
-              <Switch onChange={this.ylogchange} checked={this.state.ylog}  className = "select-switch-center" checkedIcon = {false} uncheckedIcon = {false}/>
-              <Label for="exampleSelect" className = "select-switch-back">Log</Label>
+            <div className = "select-item">
+              <Button2.Group fluid>
+                <Button2 active={!this.state.showname} onClick={()=>this.setState({showname:false})}>Hide Name</Button2>
+                <Button2.Or />
+                <Button2 active={this.state.showname} onClick={()=>this.setState({showname:true})}>Display Name</Button2>
+              </Button2.Group>
             </div>
           </NavItem>
         </Nav>
@@ -548,7 +564,6 @@ class Graph extends Component {
             zeroline: true,
             type:this.state.xtype,
             autorange: true,
-            rangeslider: {},
           },
           yaxis:{
             title: {text: this.state.yaxis},
@@ -565,3 +580,13 @@ class Graph extends Component {
 }
 
 export default Graph;
+
+/*
+<div className = "select-item">
+  <Button2.Group fluid>
+    <Button2 active={!this.state.massbased}  onClick={()=>this.setState({massbased:false})}>Per Volume</Button2>
+    <Button2.Or />
+    <Button2 active={this.state.massbased}  onClick={()=>this.setState({massbased:true})}>Per Mass</Button2>
+  </Button2.Group>
+</div>
+*/
