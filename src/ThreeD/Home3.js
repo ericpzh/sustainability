@@ -3,7 +3,7 @@ import './Home3.css';
 import Filter3 from './Filter3.js';
 import Graph3 from './Graph3.js';
 import * as math from 'mathjs';
-import { push as Menu } from 'react-burger-menu';
+import {Sidebar, Segment, Menu, Icon, Button, Dimmer, Loader  } from 'semantic-ui-react';
 import Header from '../Common/Header.js';
 import Favicon from 'react-favicon';
 import favicon from '../assets/favicon.ico'
@@ -24,7 +24,7 @@ class Home3 extends Component {
         height: window.innerHeight,
         overlay: true,
         selectionwidth: "100%",
-        menuwidth: "25%",
+        loading: true,
     };
     this.onCheck = this.onCheck.bind(this);
     this.onExpand = this.onExpand.bind(this);
@@ -56,17 +56,16 @@ class Home3 extends Component {
       this.setState({
         sidebarOpen: false,
         selectionwidth:"100%",
-        menuwidth:"75%",
         overlay : false,
       });
     }else{
       this.setState({
-        menuwidth:"25%",
         overlay : true,
         sidebarOpen: true,
-        selectionwidth:"75%",
+        selectionwidth:"80%",
       });
     }
+    this.setState({loading:false});
   }
 
   componentWillUnmount() {
@@ -74,6 +73,7 @@ class Home3 extends Component {
   }
 
   initData(result) {
+    this.setState({loading:true});
     var checked = [];
     var expanded = ['All Material'];
     var impacts = [];
@@ -97,6 +97,7 @@ class Home3 extends Component {
       checked: checked,
       expanded: expanded,
     });
+    this.setState({loading:false});
   }
 
   setselected(selected) {
@@ -115,15 +116,13 @@ class Home3 extends Component {
       this.setState({
         sidebarOpen: false,
         selectionwidth:"100%",
-        menuwidth:"75%",
         overlay : false,
       });
     }else{
       this.setState({
-        menuwidth:"25%",
         overlay : true,
         sidebarOpen: true,
-        selectionwidth:"75%",
+        selectionwidth:"80%",
       });
       this.setState({
         sidebarOpen: false,
@@ -145,11 +144,6 @@ class Home3 extends Component {
   }
 
   modaltoggle() {
-    if (this.state.modal == false){
-      this.setState({
-        sidebarOpen: false,
-       });
-    }
     this.setState(prevState => ({
       modal: !prevState.modal
     }));
@@ -165,20 +159,37 @@ class Home3 extends Component {
     if (store.get('password') === store.get('correctpassword') && typeof store.get('correctpassword') !== "undefined"){
       return(
         <div className="Home3">
-          <Favicon url={favicon} />
-          <Header/>
-          <div id="outer-container">
-            <Menu left width = {this.state.menuwidth} styles={{bmBurgerButton: {display: 'none'}, bmCrossButton: {display: 'none'}} } isOpen={this.state.sidebarOpen} onStateChange={ this.onSetSidebarOpen } disableOverlayClick={this.state.overlay} noOverlay={this.state.overlay} pageWrapId={ "page-wrap" } outerContainerId={ "outer-container" }>
-              <div className="scroll">
-              <Filter3 data = {this.state.data} checked = {this.state.checked} expanded = {this.state.expanded} onCheck = {this.onCheck} onExpand = {this.onExpand} selected = {this.state.selected} set = {this.setselected}/>
-              </div>
-            </Menu>
-            <main id="page-wrap" style={{}}>
-              <div className="scroll-fix">
-                <Graph3 data = {this.state.data} checked = {this.state.checked} selected = {this.state.selected} sidebartoggle = {this.sidebartoggle} sidebarOpen = {this.state.sidebarOpen} selectionwidth = {this.state.selectionwidth} modal = {this.state.modal} modaltoggle = {this.modaltoggle} updatechecked = {this.updatechecked}/>
-              </div>
-            </main>
-          </div>
+        <Favicon url={favicon} />
+        <Header/>
+        <Segment>
+          <Dimmer active={this.state.loading} inverted>
+            <Loader inverted>Loading</Loader>
+          </Dimmer>
+          <Sidebar.Pushable as={Segment}>
+            <Sidebar
+              as={Menu}
+              animation='slide along'
+              direction='left'
+              vertical
+              width = "wide"
+              visible={this.state.sidebarOpen}
+            >
+              <Menu.Item as='a'>
+                <div className="scroll">
+                  <Button fluid onClick={()=>this.setState({sidebarOpen: false})}>Hide</Button>
+                  <Filter3 data = {this.state.data} checked = {this.state.checked} expanded = {this.state.expanded} onCheck = {this.onCheck} onExpand = {this.onExpand} selected = {this.state.selected} set = {this.setselected}/>
+                  </div>
+              </Menu.Item>
+            </Sidebar>
+            <Sidebar.Pusher dimmed={!this.state.overlay && this.state.sidebarOpen}>
+              <Segment basic>
+                <div className="scroll-fix">
+                  <Graph3 data = {this.state.data} checked = {this.state.checked} selected = {this.state.selected} sidebartoggle = {this.sidebartoggle} sidebarOpen = {this.state.sidebarOpen} selectionwidth = {this.state.selectionwidth} modal = {this.state.modal} modaltoggle = {this.modaltoggle} updatechecked = {this.updatechecked}/>
+                </div>
+              </Segment>
+            </Sidebar.Pusher>
+          </Sidebar.Pushable>
+          </Segment>
         </div>
       );
     }else{

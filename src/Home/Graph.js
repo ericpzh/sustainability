@@ -444,149 +444,139 @@ class Graph extends Component {
   render() {
     return (
       <div className="Graph">
-      <Modal isOpen={this.props.modal} toggle={this.props.modaltoggle} className={this.props.className}>
-        <ModalHeader toggle={this.props.modaltoggle}>Best Material Optimize for:</ModalHeader>
-        <ModalBody>
-          <h2>Per Mass: </h2>
-          <p>Material Impacts: {this.processResult(this.props.data,this.props.checked)['MaterialMass']}</p>
-          <p>Cost: {this.processResult(this.props.data,this.props.checked)['CostMass']}</p>
-          <p>Disposal Impacts: {this.processResult(this.props.data,this.props.checked)['DisposalMass']}</p>
-          <p>EoL potential: {this.processResult(this.props.data,this.props.checked)['EoLMass']}</p>
-          <p>Lifecycle Impacts: {this.processResult(this.props.data,this.props.checked)['LCMass']}</p>
-          <h2>Per Volume: </h2>
-          <p>Material Impacts: {this.processResult(this.props.data,this.props.checked)['MaterialVol']}</p>
-          <p>Cost: {this.processResult(this.props.data,this.props.checked)['CostVol']}</p>
-          <p>Disposal Impacts: {this.processResult(this.props.data,this.props.checked)['DisposalVol']}</p>
-          <p>EoL potential: {this.processResult(this.props.data,this.props.checked)['EoLVol']}</p>
-          <p>Lifecycle Impacts: {this.processResult(this.props.data,this.props.checked)['LCVol']}</p>
-        </ModalBody>
-      </Modal>
-      <Navbar color="faded" light style = {{width: this.props.selectionwidth}}>
-        <NavbarBrand href="/" className="mr-auto" disable="true"></NavbarBrand>
-        <Button color = "secondary"  onClick={this.props.sidebartoggle} style={{margin:'0 0'}} active={this.props.sidebarOpen}>	&#9665; Filters</Button>
-        <Button color = "secondary"  onClick={this.props.modaltoggle} style={{margin:'0 2.5%'}} active={this.props.modal}> Results</Button>
-        <NavbarToggler onClick={this.toggleNavbar} className="mr-2" />
-        <Collapse isOpen={!this.state.collapsed} navbar>
-          <Nav navbar>
-            <NavItem className = "selectcontainer">
+        <Modal isOpen={this.props.modal} toggle={this.props.modaltoggle} className={this.props.className}>
+          <ModalHeader toggle={this.props.modaltoggle}>Best Material Optimize for:</ModalHeader>
+          <ModalBody>
+            <h2>Per Mass: </h2>
+            <p>Material Impacts: {this.processResult(this.props.data,this.props.checked)['MaterialMass']}</p>
+            <p>Cost: {this.processResult(this.props.data,this.props.checked)['CostMass']}</p>
+            <p>Disposal Impacts: {this.processResult(this.props.data,this.props.checked)['DisposalMass']}</p>
+            <p>EoL potential: {this.processResult(this.props.data,this.props.checked)['EoLMass']}</p>
+            <p>Lifecycle Impacts: {this.processResult(this.props.data,this.props.checked)['LCMass']}</p>
+            <h2>Per Volume: </h2>
+            <p>Material Impacts: {this.processResult(this.props.data,this.props.checked)['MaterialVol']}</p>
+            <p>Cost: {this.processResult(this.props.data,this.props.checked)['CostVol']}</p>
+            <p>Disposal Impacts: {this.processResult(this.props.data,this.props.checked)['DisposalVol']}</p>
+            <p>EoL potential: {this.processResult(this.props.data,this.props.checked)['EoLVol']}</p>
+            <p>Lifecycle Impacts: {this.processResult(this.props.data,this.props.checked)['LCVol']}</p>
+          </ModalBody>
+        </Modal>
+        <Navbar color="faded" light style = {{width: this.props.selectionwidth}}>
+          <NavbarBrand href="/" className="mr-auto" disable="true"></NavbarBrand>
+          <Button color = "secondary"  onClick={this.props.sidebartoggle} style={{margin:'0 0'}} active={this.props.sidebarOpen}>	&#9665; Filters</Button>
+          <Button color = "secondary"  onClick={this.props.modaltoggle} style={{margin:'0 2.5%'}} active={this.props.modal}> Results</Button>
+          <NavbarToggler onClick={this.toggleNavbar} className="mr-2" />
+          <Collapse isOpen={!this.state.collapsed} navbar>
+            <Nav navbar>
+              <NavItem className = "selectcontainer">
+                <div className = "select-item">
+                <Menu fluid>
+                  <Menu.Item header fluid>Select X-axis:</Menu.Item>
+                  <Dropdown
+                    placeholder='X-Axis'
+                    value = {this.state.xaxis}
+                    onChange = {(e, { value }) => this.setState({ xaxis: value })}
+                    fluid
+                    selection
+                    options={[
+                      {text:"Lifecycle Impacts(kgCO2-eq)",value:"Lifecycle Impacts"},
+                      {text:"Material Impacts(kgCO2-eq)",value:"Material Impacts"},
+                      {text:"Cost($)",value:"Cost"},
+                      {text:"Disposal Impacts(kgCO2-eq)",value:"Disposal Impacts"},
+                      {text:"EoL potential(kgCO2-eq)",value:"EoL potential"},
+                    ]}
+                  />
+                </Menu>
+                </div>
+                <div className = "select-item">
+                <Menu fluid>
+                  <Menu.Item header fluid>Select Y-axis:</Menu.Item>
+                  <Dropdown
+                    placeholder='Y-Axis'
+                    value = {this.state.yaxis}
+                    onChange = {(e, { value }) => this.setState({ yaxis: value })}
+                    fluid
+                    selection
+                    options={[
+                      {text:"Lifecycle Impacts(kgCO2-eq)",value:"Lifecycle Impacts"},
+                      {text:"Material Impacts(kgCO2-eq)",value:"Material Impacts"},
+                      {text:"Cost($)",value:"Cost"},
+                      {text:"Disposal Impacts(kgCO2-eq)",value:"Disposal Impacts"},
+                      {text:"EoL potential(kgCO2-eq)",value:"EoL potential"},
+                    ]}
+                  />
+                  </Menu>
+              </div>
+
               <div className = "select-item">
-              <Menu fluid>
-                <Menu.Item header fluid>Select X-axis:</Menu.Item>
-                <Dropdown
-                  placeholder='X-Axis'
-                  value = {this.state.xaxis}
-                  onChange = {(e, { value }) => this.setState({ xaxis: value })}
-                  fluid
-                  selection
-                  options={[
-                    {text:"Lifecycle Impacts(kgCO2-eq)",value:"Lifecycle Impacts"},
-                    {text:"Material Impacts(kgCO2-eq)",value:"Material Impacts"},
-                    {text:"Cost($)",value:"Cost"},
-                    {text:"Disposal Impacts(kgCO2-eq)",value:"Disposal Impacts"},
-                    {text:"EoL potential(kgCO2-eq)",value:"EoL potential"},
-                  ]}
-                />
-              </Menu>
+                <Button2.Group fluid>
+                  <Button2 active={!this.state.xlog}  onClick={()=>this.setState({xlog:false,xtype:''})}>X-axis: Normal</Button2>
+                  <Button2.Or text="X"/>
+                  <Button2 active={this.state.xlog}  onClick={()=>this.setState({xlog:true,xtype:'log'})}>X-axis: Log</Button2>
+                </Button2.Group>
               </div>
               <div className = "select-item">
-              <Menu fluid>
-                <Menu.Item header fluid>Select Y-axis:</Menu.Item>
-                <Dropdown
-                  placeholder='Y-Axis'
-                  value = {this.state.yaxis}
-                  onChange = {(e, { value }) => this.setState({ yaxis: value })}
-                  fluid
-                  selection
-                  options={[
-                    {text:"Lifecycle Impacts(kgCO2-eq)",value:"Lifecycle Impacts"},
-                    {text:"Material Impacts(kgCO2-eq)",value:"Material Impacts"},
-                    {text:"Cost($)",value:"Cost"},
-                    {text:"Disposal Impacts(kgCO2-eq)",value:"Disposal Impacts"},
-                    {text:"EoL potential(kgCO2-eq)",value:"EoL potential"},
-                  ]}
-                />
-                </Menu>
-            </div>
+                <Button2.Group fluid>
+                  <Button2 active={!this.state.ylog}  onClick={()=>this.setState({ylog:false,ytype:''})}>Y-axis: Normal</Button2>
+                  <Button2.Or text="Y"/>
+                  <Button2 active={this.state.ylog}  onClick={()=>this.setState({ylog:true,ytype:'log'})}>Y-axis: Log</Button2>
+                </Button2.Group>
+              </div>
 
-            <div className = "select-item">
-              <Button2.Group fluid>
-                <Button2 active={!this.state.xlog}  onClick={()=>this.setState({xlog:false,xtype:''})}>X-axis: Normal</Button2>
-                <Button2.Or text="X"/>
-                <Button2 active={this.state.xlog}  onClick={()=>this.setState({xlog:true,xtype:'log'})}>X-axis: Log</Button2>
-              </Button2.Group>
-            </div>
-            <div className = "select-item">
-              <Button2.Group fluid>
-                <Button2 active={!this.state.ylog}  onClick={()=>this.setState({ylog:false,ytype:''})}>Y-axis: Normal</Button2>
-                <Button2.Or text="Y"/>
-                <Button2 active={this.state.ylog}  onClick={()=>this.setState({ylog:true,ytype:'log'})}>Y-axis: Log</Button2>
-              </Button2.Group>
-            </div>
+              <div className = "select-item">
+                <Button2.Group fluid>
+                  <Button2 active={this.state.shapeoption===0} onClick={()=>this.setState({shapeoption:0})}>None</Button2>
+                  <Button2.Or />
+                  <Button2 active={this.state.shapeoption===1} onClick={()=>this.setState({shapeoption:1})}>Convex Hull</Button2>
+                  <Button2.Or />
+                  <Button2 active={this.state.shapeoption===2} onClick={()=>this.setState({shapeoption:2})}>Heat Map</Button2>
+                </Button2.Group>
+              </div>
+              <div className = "select-item">
+                <Button2.Group fluid>
+                  <Button2 active={!this.state.showname} onClick={()=>this.setState({showname:false})}>Hide Name</Button2>
+                  <Button2.Or />
+                  <Button2 active={this.state.showname} onClick={()=>this.setState({showname:true})}>Display Name</Button2>
+                </Button2.Group>
+              </div>
+            </NavItem>
+          </Nav>
+          </Collapse>
+        </Navbar>
 
-            <div className = "select-item">
-              <Button2.Group fluid>
-                <Button2 active={this.state.shapeoption===0} onClick={()=>this.setState({shapeoption:0})}>None</Button2>
-                <Button2.Or />
-                <Button2 active={this.state.shapeoption===1} onClick={()=>this.setState({shapeoption:1})}>Convex Hull</Button2>
-                <Button2.Or />
-                <Button2 active={this.state.shapeoption===2} onClick={()=>this.setState({shapeoption:2})}>Heat Map</Button2>
-              </Button2.Group>
-            </div>
-            <div className = "select-item">
-              <Button2.Group fluid>
-                <Button2 active={!this.state.showname} onClick={()=>this.setState({showname:false})}>Hide Name</Button2>
-                <Button2.Or />
-                <Button2 active={this.state.showname} onClick={()=>this.setState({showname:true})}>Display Name</Button2>
-              </Button2.Group>
-            </div>
-          </NavItem>
-        </Nav>
-        </Collapse>
-      </Navbar>
-
-      <Plot
-        onSelected = {(obj) => this.handleSelected(obj)}
-        data = {this.processData(this.props.data,this.props.checked)}
-        layout = {{
-          shapes: this.addshapes(this.processData(this.props.data,this.props.checked)),
-          autoresize : false,
-          width: this.state.graphwidth,
-          height:  this.state.graphheight,
-          showlegend: this.state.showlegend,
-          font: {
-            family: 'Lato',
-            size: 16,
-            color: 'rgb(100,150,200)'
-          },
-          xaxis:{
-            title: {text: this.state.xaxis},
-            showgrid: true,
-            zeroline: true,
-            type:this.state.xtype,
-            autorange: true,
-          },
-          yaxis:{
-            title: {text: this.state.yaxis},
-            showgrid: true,
-            zeroline: true,
-            type: this.state.ytype,
-            autorange: true,
-          },
-        }}
-      />
+        <Plot
+          onSelected = {(obj) => this.handleSelected(obj)}
+          data = {this.processData(this.props.data,this.props.checked)}
+          layout = {{
+            shapes: this.addshapes(this.processData(this.props.data,this.props.checked)),
+            autoresize : false,
+            width: this.state.graphwidth,
+            height:  this.state.graphheight,
+            showlegend: this.state.showlegend,
+            font: {
+              family: 'Lato',
+              size: 16,
+              color: 'rgb(100,150,200)'
+            },
+            xaxis:{
+              title: {text: this.state.xaxis},
+              showgrid: true,
+              zeroline: true,
+              type:this.state.xtype,
+              autorange: true,
+            },
+            yaxis:{
+              title: {text: this.state.yaxis},
+              showgrid: true,
+              zeroline: true,
+              type: this.state.ytype,
+              autorange: true,
+            },
+          }}
+        />
       </div>
     );
   }
 }
 
 export default Graph;
-
-/*
-<div className = "select-item">
-  <Button2.Group fluid>
-    <Button2 active={!this.state.massbased}  onClick={()=>this.setState({massbased:false})}>Per Volume</Button2>
-    <Button2.Or />
-    <Button2 active={this.state.massbased}  onClick={()=>this.setState({massbased:true})}>Per Mass</Button2>
-  </Button2.Group>
-</div>
-*/
