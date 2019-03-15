@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Label, Input, Button, Collapse, Navbar, NavbarToggler, NavbarBrand, Nav, NavItem, Modal, ModalHeader, ModalBody} from 'reactstrap';
-import { Button as Button2 , Dropdown, Menu} from 'semantic-ui-react';
+import { Button as Button2 , Dropdown, Menu, Icon, Label as Label2, Divider} from 'semantic-ui-react';
 import Plot from 'react-plotly.js';
 import './Home.css';
 import calculateConvexHull from 'geo-convex-hull';
@@ -46,6 +46,7 @@ class Graph extends Component {
           showlegend: true,
           collapsed: false,
           shapeoption: 0, //0:none, 1:convenHull, 2:big radius
+          vertical: false,
       };
   }
 
@@ -65,6 +66,7 @@ class Graph extends Component {
         height: window.innerHeight,
         graphheight : 0.55 * window.innerHeight,
         graphwidth : 0.75 * window.innerWidth,
+        vertical: false,
        });
     }else{
       this.setState({
@@ -72,6 +74,7 @@ class Graph extends Component {
         height: window.innerHeight,
         graphheight : 0.75 * window.innerHeight,
         graphwidth : 0.95 * window.innerWidth,
+        vertical: true,
        });
     }
     if(window.innerWidth>700){
@@ -322,7 +325,7 @@ class Graph extends Component {
                 y0: traces[i]['y'][j]-traces[i]['marker']['size']/3/6,
                 x1: traces[i]['x'][j]+traces[i]['marker']['size']/3/6,
                 y1: traces[i]['y'][j]+traces[i]['marker']['size']/3/6,
-                opacity: 0.1,
+                opacity: 0.2,
                 fillcolor: traces[i]['marker']['color'],
                 line: {
                     width: traces[i]['marker']['size']/3,
@@ -461,11 +464,13 @@ class Graph extends Component {
             <p>Lifecycle Impacts: {this.processResult(this.props.data,this.props.checked)['LCVol']}</p>
           </ModalBody>
         </Modal>
+        <Button2.Group labeled icon vertical={this.state.vertical} fluid={this.state.vertical}>
+          <Button2 content='Filters' icon='filter' labelPosition='left' onClick={this.props.sidebartoggle}  active={this.props.sidebarOpen} style={{margin:"1%"}}/>
+          <Button2 content='Results' icon='calculator' labelPosition='left' onClick={this.props.modaltoggle}  active={this.props.modal} style={{margin:"1%"}}/>
+          <Button2 content='Options' icon='options' labelPosition='left' onClick={this.toggleNavbar}  active={!this.state.collapsed} style={{margin:"1%"}}/>
+        </Button2.Group>
+        <Divider />
         <Navbar color="faded" light style = {{width: this.props.selectionwidth}}>
-          <NavbarBrand href="/" className="mr-auto" disable="true"></NavbarBrand>
-          <Button color = "secondary"  onClick={this.props.sidebartoggle} style={{margin:'0 0'}} active={this.props.sidebarOpen}>	&#9665; Filters</Button>
-          <Button color = "secondary"  onClick={this.props.modaltoggle} style={{margin:'0 2.5%'}} active={this.props.modal}> Results</Button>
-          <NavbarToggler onClick={this.toggleNavbar} className="mr-2" />
           <Collapse isOpen={!this.state.collapsed} navbar>
             <Nav navbar>
               <NavItem className = "selectcontainer">
