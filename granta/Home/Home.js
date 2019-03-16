@@ -36,7 +36,7 @@ class Home extends Component {
     styleLink.rel = "stylesheet";
     styleLink.href = "https://cdn.jsdelivr.net/npm/semantic-ui/dist/semantic.min.css";
     document.head.appendChild(styleLink);
-    var csvFilePath = require("../assets/Idematapp.csv");
+    var csvFilePath = require("../assets/Granta.csv");
     var Papa = require("papaparse");
     Papa.parse(csvFilePath, {
       header: true,
@@ -66,20 +66,22 @@ class Home extends Component {
     window.removeEventListener('resize', this.updateWindowDimensions);
   }
 
-  initData(result) {//prepare checkboxtree + initial graph
+  initData(result) {
     var checked = [];
     var expanded = ['All Material'];
-    var x = [];
-    var y = [];
+    var impacts = [];
+    var cost = [];
     const data = result.data;
     for (var i = 0; i < result.data.length ; i++){
-      x.push(result.data[i]['Life Cycle Carbon Footprint(kg CO2 eq.)']);
-      y.push(result.data[i]['LifeCycle ReCiPe Endpoints']);
+      checked.push(result.data[i]['Name']);
+      cost.push(result.data[i]['Cost']);
+      impacts.push(result.data[i]['Lifecycle Impacts']);
     }
-    var x75 = math.quantileSeq(x, 0.75);
-    var y75 = math.quantileSeq(y, 0.75);
+    var impacts75th = math.quantileSeq(impacts, 0.75);
+    var cost75th = math.quantileSeq(cost, 0.75);
+    checked = [];
     for (var i = 0; i < result.data.length ; i++){
-      if (result.data[i]['Life Cycle Carbon Footprint(kg CO2 eq.)'] < 3 * x75 && result.data[i]['LifeCycle ReCiPe Endpoints'] < 3 * y75 && result.data[i]['Life Cycle Carbon Footprint(kg CO2 eq.)'] > 0 && result.data[i]['LifeCycle ReCiPe Endpoints'] > 0){
+      if (result.data[i]['Lifecycle Impacts'] < 3 * impacts75th && result.data[i]['Cost'] < 3 * cost75th){
         checked.push(result.data[i]['Name']);
       }
     }

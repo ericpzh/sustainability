@@ -1,12 +1,23 @@
 import React, { Component } from 'react';
 import { Label, Input, Button, Collapse, Navbar, NavbarToggler, NavbarBrand, Nav, NavItem, Modal, ModalHeader, ModalBody} from 'reactstrap';
-import { Button as Button2 , Dropdown, Menu, Icon, Label as Label2, Divider, Table} from 'semantic-ui-react';
+import { Button as Button2 , Dropdown, Menu, Icon, Label as Label2, Divider} from 'semantic-ui-react';
 import Plot from 'react-plotly.js';
 import './Home.css';
 import calculateConvexHull from 'geo-convex-hull';
 import * as math from 'mathjs';
 
-const colorwheel = ['#e6194b', '#3cb44b', '#ffe119', '#4363d8', '#f58231', '#911eb4', '#46f0f0', '#f032e6', '#bcf60c', '#fabebe', '#008080', '#e6beff', '#9a6324', '#fffac8', '#800000', '#aaffc3', '#808000', '#ffd8b1', '#000075', '#808080'];
+const colorwheel = [
+    '#1f77b4',  // muted blue
+    '#ff7f0e',  // safety orange
+    '#2ca02c',  // cooked asparagus green
+    '#d62728',  // brick red
+    '#9467bd',  // muted purple
+    '#8c564b',  // chestnut brown
+    '#e377c2',  // raspberry yogurt pink
+    '#7f7f7f',  // middle gray
+    '#bcbd22',  // curry yellow-green
+    '#17becf'   // blue-teal
+];
 
 
 class Graph extends Component {
@@ -23,8 +34,8 @@ class Graph extends Component {
       this.addshapes = this.addshapes.bind(this);
       this.isvalid = this.isvalid.bind(this);
       this.state = {
-          xaxis: "Life Cycle Carbon Footprint(kg CO2 eq.)",
-          yaxis: "LifeCycle ReCiPe Endpoints",
+          xaxis: "Lifecycle Impacts",
+          yaxis: "Cost",
           width: window.innerWidth,
           height: window.innerHeight,
           massbased: true,
@@ -120,15 +131,28 @@ class Graph extends Component {
       }
       if (typeof data !== "undefined" && data.length > 0){
         //build types
+        traces.push({
+          x: [],
+          y: [],
+          text: [],
+          type: 'scatter',
+          mode: mode,
+          name: data[0]['Type'],
+          textposition: 'bottom center',
+          marker: {
+            size: size,
+            color:colorwheel[coloridx]
+          }
+        });
         for (var i = 1; i < data.length ; i++){
-          if (data[i]['Type1'] !== "" && ( i===0 || i>0 && data[i]['Type1'] !== data[i-1]['Type1'])){
+          if (data[i]['Type'] !== "" && data[i]['Type'] !== data[i-1]['Type']){
             traces.push({
               x: [],
               y: [],
               text: [],
               type: 'scatter',
               mode: mode,
-              name: data[i]['Type1'],
+              name: data[i]['Type'],
               textposition: 'bottom center',
               marker: {
                 size: size,
@@ -139,15 +163,15 @@ class Graph extends Component {
         }
         //build datas
         for (var i = 0; i < data.length ; i++){
-          if (data[i]['Type1'] !== "" &&  checked.includes(data[i]['Name']) && this.checkselected(data[i])){
+          if (data[i]['Type'] !== "" &&  checked.includes(data[i]['Name']) && this.checkselected(data[i])){
             for (var j = 0; j < traces.length ; j++){
-              if (traces[j]['name'] === data[i]['Type1']){
+              if (traces[j]['name'] === data[i]['Type']){
                 var valid = this.isvalid(data[i]);
                 if (valid){
                   traces[j]['x'].push(valid.x);
                   traces[j]['y'].push(valid.y);
-                  traces[j]['text'].push(data[i]['Name']);
                 }
+                traces[j]['text'].push(data[i]['Name']);
                 break;
               }
             }
@@ -321,17 +345,64 @@ class Graph extends Component {
     return shapes;
   }
 
-  processResult(data,checked,col){//result modal data
-      var result = "N/A";
+  processResult(data,checked){//result modal data
+      var result= {MaterialMass:'',CostMass:'',DisposalMass:'',EoLMass:'',LCMass:'',MaterialVol:'',CostVol:'',DisposalVol:'',EoLVol:'',LCVol:''};
       if (data.length > 0 && checked.length > 0){
-        var ret = [];
+        var materialmass = [];
+        var costmass = [];
+        var disposalmass = [];
+        var eolmass = [];
+        var lcmass = [];
+        var materialvol = [];
+        var costvol = [];
+        var disposalvol = [];
+        var eolvol = [];
+        var lcvol = [];
         for (var i = 0; i < data.length ; i++){
           if (data[i]['Type'] !== "" &&  checked.includes(data[i]['Name']) && this.checkselected(data[i]) && this.isvalid(data[i])){
-              ret.push({name:data[i]['Name'],value:data[i][col]});
+            if (data[i]['Density'] !== 0){
+              materialmass.push({name:data[i]['Name'],value:data[i]['Material Impacts']/data[i]['Density']});
+              costmass.push({name:data[i]['Name'],value:data[i]['Cost']/data[i]['Density']});
+              disposalmass.push({name:data[i]['Name'],value:data[i]['Disposal Impacts']/data[i]['Density']});
+              eolmass.push({name:data[i]['Name'],value:data[i]['EoL potential']/data[i]['Density']});
+              lcmass.push({name:data[i]['Name'],value:data[i]['Lifecycle Impacts']/data[i]['Density']})
+            }
+            materialvol.push({name:data[i]['Name'],value:data[i]['Material Impacts']});
+            costvol.push({name:data[i]['Name'],value:data[i]['Cost']});
+            disposalvol.push({name:data[i]['Name'],value:data[i]['Disposal Impacts']});
+            eolvol.push({name:data[i]['Name'],value:data[i]['EoL potential']});
+            lcvol.push({name:data[i]['Name'],value:data[i]['Lifecycle Impacts']})
           }
         }
-        if (ret.length > 0){
-          result = ret.sort(function(a, b){return a['value'] - b['value']})[0]['name'];
+        if (materialmass.length > 0){
+          result['MaterialMass'] = materialmass.sort(function(a, b){return a['value'] - b['value']})[0]['name'];
+        }
+        if (costmass.length > 0){
+          result['CostMass'] = costmass.sort(function(a, b){return a['value'] - b['value']})[0]['name'];
+        }
+        if (disposalmass.length > 0){
+          result['DisposalMass'] = disposalmass.sort(function(a, b){return a['value'] - b['value']})[0]['name'];
+        }
+        if (eolmass.length > 0){
+          result['EoLMass'] = eolmass.sort(function(a, b){return a['value'] - b['value']})[0]['name'];
+        }
+        if (lcmass.length > 0){
+          result['LCMass'] = lcmass.sort(function(a, b){return a['value'] - b['value']})[0]['name'];
+        }
+        if (materialvol.length > 0){
+          result['MaterialVol'] = materialvol.sort(function(a, b){return a['value'] - b['value']})[0]['name'];
+        }
+        if (costvol.length > 0){
+          result['CostVol'] = costvol.sort(function(a, b){return a['value'] - b['value']})[0]['name'];
+        }
+        if (disposalvol.length > 0){
+          result['DisposalVol'] = disposalvol.sort(function(a, b){return a['value'] - b['value']})[0]['name'];
+        }
+        if (eolvol.length > 0){
+          result['EoLVol'] = eolvol.sort(function(a, b){return a['value'] - b['value']})[0]['name'];
+        }
+        if (lcvol.length > 0){
+          result['LCVol'] = lcvol.sort(function(a, b){return a['value'] - b['value']})[0]['name'];
         }
       }
       return result;
@@ -362,8 +433,18 @@ class Graph extends Component {
   }
 
   isvalid(data){//check tree&range
-    if (this.props.checked.indexOf(data['Name']) > -1){
-      return {x:data[this.state.xaxis],y:data[this.state.yaxis]};
+    if (this.state.massbased && data['Density'] !== 0){
+      var x = data[this.state.xaxis]/data['Density'];
+      var y = data[this.state.yaxis]/data['Density'];
+      if (this.props.checked.indexOf(data['Name']) > -1){
+        return {x:x,y:y};
+      }
+    }else{
+      var x = data[this.state.xaxis];
+      var y = data[this.state.yaxis];
+      if (this.props.checked.indexOf(data['Name']) > -1){
+        return {x:x,y:y};
+      }
     }
     return;
   }
@@ -372,48 +453,20 @@ class Graph extends Component {
     return (
       <div className="Graph">
         <Modal isOpen={this.props.modal} toggle={this.props.modaltoggle} className={this.props.className}>
-          <ModalHeader toggle={this.props.modaltoggle}>Best Material For:</ModalHeader>
+          <ModalHeader toggle={this.props.modaltoggle}>Best Material Optimize for:</ModalHeader>
           <ModalBody>
-           <Table celled striped>
-              <Table.Body>
-                <Table.Row>
-                  <Table.Cell>Material Carbon Footprint(kg CO2 eq.): </Table.Cell>
-                  <Table.Cell>{this.processResult(this.props.data,this.props.checked,'Material Carbon Footprint(kg CO2 eq.)')}</Table.Cell>
-                </Table.Row>
-                <Table.Row>
-                  <Table.Cell>Processing Carbon Footprint(kg CO2 eq.): </Table.Cell>
-                  <Table.Cell>{this.processResult(this.props.data,this.props.checked,'Processing Carbon Footprint(kg CO2 eq.)')}</Table.Cell>
-                </Table.Row>
-                <Table.Row>
-                  <Table.Cell>EoL Carbon Footprint(kg CO2 eq.): </Table.Cell>
-                  <Table.Cell>{this.processResult(this.props.data,this.props.checked,'EoL Carbon Footprint(kg CO2 eq.)')}</Table.Cell>
-                </Table.Row>
-                <Table.Row>
-                  <Table.Cell>Life Cycle Carbon Footprint(kg CO2 eq.): </Table.Cell>
-                  <Table.Cell>{this.processResult(this.props.data,this.props.checked,'Life Cycle Carbon Footprint(kg CO2 eq.)')}</Table.Cell>
-                </Table.Row>
-                <Table.Row>
-                  <Table.Cell>Total LifeCycle CED(MJ): </Table.Cell>
-                  <Table.Cell>{this.processResult(this.props.data,this.props.checked,'Total LifeCycle CED(MJ)')}</Table.Cell>
-                </Table.Row>
-                <Table.Row>
-                  <Table.Cell>LifeCycle ReCiPe Human Health(DALY): </Table.Cell>
-                  <Table.Cell>{this.processResult(this.props.data,this.props.checked,'LifeCycle ReCiPe Human Health(DALY)')}</Table.Cell>
-                </Table.Row>
-                <Table.Row>
-                  <Table.Cell>LifeCycle ReCiPe Ecotoxixity(species.year): </Table.Cell>
-                  <Table.Cell>{this.processResult(this.props.data,this.props.checked,'LifeCycle ReCiPe Ecotoxixity(species.year)')}</Table.Cell>
-                </Table.Row>
-                <Table.Row>
-                  <Table.Cell>LifeCycle ReCiPe Resources Depletion($): </Table.Cell>
-                  <Table.Cell>{this.processResult(this.props.data,this.props.checked,'LifeCycle ReCiPe Resources Depletion($)')}</Table.Cell>
-                </Table.Row>
-                <Table.Row>
-                  <Table.Cell>LifeCycle ReCiPe Endpoints: </Table.Cell>
-                  <Table.Cell>{this.processResult(this.props.data,this.props.checked,'LifeCycle ReCiPe Endpoints')}</Table.Cell>
-                </Table.Row>
-              </Table.Body>
-            </Table>
+            <h2>Per Mass: </h2>
+            <p>Material Impacts: {this.processResult(this.props.data,this.props.checked)['MaterialMass']}</p>
+            <p>Cost: {this.processResult(this.props.data,this.props.checked)['CostMass']}</p>
+            <p>Disposal Impacts: {this.processResult(this.props.data,this.props.checked)['DisposalMass']}</p>
+            <p>EoL potential: {this.processResult(this.props.data,this.props.checked)['EoLMass']}</p>
+            <p>Lifecycle Impacts: {this.processResult(this.props.data,this.props.checked)['LCMass']}</p>
+            <h2>Per Volume: </h2>
+            <p>Material Impacts: {this.processResult(this.props.data,this.props.checked)['MaterialVol']}</p>
+            <p>Cost: {this.processResult(this.props.data,this.props.checked)['CostVol']}</p>
+            <p>Disposal Impacts: {this.processResult(this.props.data,this.props.checked)['DisposalVol']}</p>
+            <p>EoL potential: {this.processResult(this.props.data,this.props.checked)['EoLVol']}</p>
+            <p>Lifecycle Impacts: {this.processResult(this.props.data,this.props.checked)['LCVol']}</p>
           </ModalBody>
         </Modal>
         <Button2.Group labeled icon vertical={this.state.vertical} fluid={this.state.vertical}>
@@ -436,15 +489,11 @@ class Graph extends Component {
                     fluid
                     selection
                     options={[
-                      {text:"Material Carbon Footprint(kg CO2 eq.)",value:"Material Carbon Footprint(kg CO2 eq.)"},
-                      {text:"Processing Carbon Footprint(kg CO2 eq.)",value:"Processing Carbon Footprint(kg CO2 eq.)"},
-                      {text:"EoL Carbon Footprint(kg CO2 eq.)",value:"EoL Carbon Footprint(kg CO2 eq.)"},
-                      {text:"Life Cycle Carbon Footprint(kg CO2 eq.)",value:"Life Cycle Carbon Footprint(kg CO2 eq.)"},
-                      {text:"Total LifeCycle CED(MJ)",value:"Total LifeCycle CED(MJ)"},
-                      {text:"LifeCycle ReCiPe Human Health(DALY)",value:"LifeCycle ReCiPe Human Health(DALY)"},
-                      {text:"LifeCycle ReCiPe Ecotoxixity(species.year)",value:"LifeCycle ReCiPe Ecotoxixity(species.year)"},
-                      {text:"LifeCycle ReCiPe Resources Depletion($)",value:"LifeCycle ReCiPe Resources Depletion($)"},
-                      {text:"LifeCycle ReCiPe Endpoints",value:"LifeCycle ReCiPe Endpoints"},
+                      {text:"Lifecycle Impacts(kgCO2-eq)",value:"Lifecycle Impacts"},
+                      {text:"Material Impacts(kgCO2-eq)",value:"Material Impacts"},
+                      {text:"Cost($)",value:"Cost"},
+                      {text:"Disposal Impacts(kgCO2-eq)",value:"Disposal Impacts"},
+                      {text:"EoL potential(kgCO2-eq)",value:"EoL potential"},
                     ]}
                   />
                 </Menu>
@@ -459,15 +508,11 @@ class Graph extends Component {
                     fluid
                     selection
                     options={[
-                      {text:"Material Carbon Footprint(kg CO2 eq.)",value:"Material Carbon Footprint(kg CO2 eq.)"},
-                      {text:"Processing Carbon Footprint(kg CO2 eq.)",value:"Processing Carbon Footprint(kg CO2 eq.)"},
-                      {text:"EoL Carbon Footprint(kg CO2 eq.)",value:"EoL Carbon Footprint(kg CO2 eq.)"},
-                      {text:"Life Cycle Carbon Footprint(kg CO2 eq.)",value:"Life Cycle Carbon Footprint(kg CO2 eq.)"},
-                      {text:"Total LifeCycle CED(MJ)",value:"Total LifeCycle CED(MJ)"},
-                      {text:"LifeCycle ReCiPe Human Health(DALY)",value:"LifeCycle ReCiPe Human Health(DALY)"},
-                      {text:"LifeCycle ReCiPe Ecotoxixity(species.year)",value:"LifeCycle ReCiPe Ecotoxixity(species.year)"},
-                      {text:"LifeCycle ReCiPe Resources Depletion($)",value:"LifeCycle ReCiPe Resources Depletion($)"},
-                      {text:"LifeCycle ReCiPe Endpoints",value:"LifeCycle ReCiPe Endpoints"},
+                      {text:"Lifecycle Impacts(kgCO2-eq)",value:"Lifecycle Impacts"},
+                      {text:"Material Impacts(kgCO2-eq)",value:"Material Impacts"},
+                      {text:"Cost($)",value:"Cost"},
+                      {text:"Disposal Impacts(kgCO2-eq)",value:"Disposal Impacts"},
+                      {text:"EoL potential(kgCO2-eq)",value:"EoL potential"},
                     ]}
                   />
                   </Menu>

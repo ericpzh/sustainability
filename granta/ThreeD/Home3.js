@@ -1,11 +1,16 @@
 import React, { Component } from 'react';
-import './Home.css';
-import Filter from './Filter.js';
-import Graph from './Graph.js';
+import './Home3.css';
+import Filter3 from './Filter3.js';
+import Graph3 from './Graph3.js';
 import * as math from 'mathjs';
-import {Sidebar, Segment, Menu, Icon, Button, Dimmer, Loader } from 'semantic-ui-react';
+import {Sidebar, Segment, Menu, Icon, Button, Dimmer, Loader  } from 'semantic-ui-react';
+import Header from '../Common/Header.js';
+import Favicon from 'react-favicon';
+import favicon from '../assets/favicon.ico'
+import Login from '../Common/Login.js'
+import store from 'store';
 
-class Home extends Component {
+class Home3 extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -32,11 +37,12 @@ class Home extends Component {
   }
 
   componentDidMount() {
+    document.title = "Sustainable Materials Advisor";
     const styleLink = document.createElement("link");
     styleLink.rel = "stylesheet";
     styleLink.href = "https://cdn.jsdelivr.net/npm/semantic-ui/dist/semantic.min.css";
     document.head.appendChild(styleLink);
-    var csvFilePath = require("../assets/Idematapp.csv");
+    var csvFilePath = require("../assets/Granta.csv");
     var Papa = require("papaparse");
     Papa.parse(csvFilePath, {
       header: true,
@@ -66,20 +72,23 @@ class Home extends Component {
     window.removeEventListener('resize', this.updateWindowDimensions);
   }
 
-  initData(result) {//prepare checkboxtree + initial graph
+  initData(result) {
+    this.setState({loading:true});
     var checked = [];
     var expanded = ['All Material'];
-    var x = [];
-    var y = [];
+    var impacts = [];
+    var cost = [];
     const data = result.data;
     for (var i = 0; i < result.data.length ; i++){
-      x.push(result.data[i]['Life Cycle Carbon Footprint(kg CO2 eq.)']);
-      y.push(result.data[i]['LifeCycle ReCiPe Endpoints']);
+      checked.push(result.data[i]['Name']);
+      cost.push(result.data[i]['Cost']);
+      impacts.push(result.data[i]['Lifecycle Impacts']);
     }
-    var x75 = math.quantileSeq(x, 0.75);
-    var y75 = math.quantileSeq(y, 0.75);
+    var impacts75th = math.quantileSeq(impacts, 0.75);
+    var cost75th = math.quantileSeq(cost, 0.75);
+    checked = [];
     for (var i = 0; i < result.data.length ; i++){
-      if (result.data[i]['Life Cycle Carbon Footprint(kg CO2 eq.)'] < 3 * x75 && result.data[i]['LifeCycle ReCiPe Endpoints'] < 3 * y75 && result.data[i]['Life Cycle Carbon Footprint(kg CO2 eq.)'] > 0 && result.data[i]['LifeCycle ReCiPe Endpoints'] > 0){
+      if (result.data[i]['Lifecycle Impacts'] < 3 * impacts75th && result.data[i]['Cost'] < 3 * cost75th){
         checked.push(result.data[i]['Name']);
       }
     }
@@ -88,6 +97,7 @@ class Home extends Component {
       checked: checked,
       expanded: expanded,
     });
+    this.setState({loading:false});
   }
 
   setselected(selected) {
@@ -144,9 +154,13 @@ class Home extends Component {
       checked: checked
     });
   }
+
   render() {
-    return (
-      <div className="Home">
+    if (store.get('password') === store.get('correctpassword') && typeof store.get('correctpassword') !== "undefined"){
+      return(
+        <div className="Home3">
+        <Favicon url={favicon} />
+        <Header/>
         <Segment>
           <Dimmer active={this.state.loading} inverted>
             <Loader inverted>Loading</Loader>
@@ -163,22 +177,30 @@ class Home extends Component {
               <Menu.Item as='a'>
                 <div className="scroll">
                   <Button fluid onClick={()=>this.setState({sidebarOpen: false})}>Hide</Button>
-                  <Filter data = {this.state.data} checked = {this.state.checked} expanded = {this.state.expanded} onCheck = {this.onCheck} onExpand = {this.onExpand} selected = {this.state.selected} set = {this.setselected}/>
-                </div>
+                  <Filter3 data = {this.state.data} checked = {this.state.checked} expanded = {this.state.expanded} onCheck = {this.onCheck} onExpand = {this.onExpand} selected = {this.state.selected} set = {this.setselected}/>
+                  </div>
               </Menu.Item>
             </Sidebar>
             <Sidebar.Pusher dimmed={!this.state.overlay && this.state.sidebarOpen}>
               <Segment basic>
                 <div className="scroll-fix">
-                  <Graph data = {this.state.data} checked = {this.state.checked} selected = {this.state.selected} sidebartoggle = {this.sidebartoggle} sidebarOpen = {this.state.sidebarOpen} selectionwidth = {this.state.selectionwidth} modal = {this.state.modal} modaltoggle = {this.modaltoggle} updatechecked = {this.updatechecked}/>
+                  <Graph3 data = {this.state.data} checked = {this.state.checked} selected = {this.state.selected} sidebartoggle = {this.sidebartoggle} sidebarOpen = {this.state.sidebarOpen} selectionwidth = {this.state.selectionwidth} modal = {this.state.modal} modaltoggle = {this.modaltoggle} updatechecked = {this.updatechecked}/>
                 </div>
               </Segment>
             </Sidebar.Pusher>
           </Sidebar.Pushable>
-        </Segment>
-      </div>
-    );
+          </Segment>
+        </div>
+      );
+    }else{
+      return (
+        <div>
+          <Favicon url={favicon} />
+          <Login/>
+        </div>
+      );
+    }
   }
 }
 
-export default Home;
+export default Home3;

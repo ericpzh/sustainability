@@ -27,47 +27,33 @@ class Filter extends Component {
         value: 'All Material',
         children:[],
       };
-      var type1count = -1;
-      var type2count = new Array(20).fill(-1);
       if (data.length > 0){
-        for (var i = 0; i < data.length ; i++){
-          if ( i===0 ||( i>0 && data[i]['Type1'] !== data[i-1]['Type1'])){//new T1 and T2
+        processedData['children'].push({
+          label : data[0]['Type'],
+          value : data[0]['Type'],
+          children : [],
+        });
+        for (var i = 1; i < data.length ; i++){
+          if (data[i]['Type'] !== "" && data[i]['Type'] !== data[i-1]['Type']){
             processedData['children'].push({
-              label: data[i]['Type1'],
-              value: data[i]['Type1'],
-              children:[
-                {
-                  label: data[i]['Type2'],
-                  value: data[i]['Type2'],
-                  children:[
-                    {
-                      label: data[i]['Name'],
-                      value: data[i]['Name'],
-                      children:[],
-                    },
-                  ],
-                },
-              ],
-            })
-            type1count ++;
-            type2count[type1count] ++;
-          }else if(data[i]['Type2'] !== data[i-1]['Type2']){//new T2
-            processedData['children'][type1count]['children'].push({
-              label: data[i]['Type2'],
-              value: data[i]['Type2'],
-              children:[{
-                label: data[i]['Name'],
-                value: data[i]['Name'],
-                children:[],
-              },],
-            })
-            type2count[type1count] ++;
-          }else{
-            processedData['children'][type1count]['children'][type2count[type1count]]['children'].push({
-              label: data[i]['Name'],
-              value: data[i]['Name'],
-              children:[],
-            })
+              label : data[i]['Type'],
+              value : data[i]['Type'],
+              children : [],
+            });
+          }
+        }
+        for (var i = 0; i < data.length ; i++){
+          if (data[i]['Type'] !== ""){
+            for (var j = 0; j < processedData['children'].length ; j++){
+              if (processedData['children'][j]['label'] === data[i]['Type']){
+                processedData['children'][j]['children'].push({
+                  label : data[i]['Name'],
+                  value : data[i]['Name'],
+                  children : [],
+                });
+                break;
+              }
+            }
           }
         }
       }
@@ -78,17 +64,15 @@ class Filter extends Component {
       return (
         <div className="Filter">
           <div className="filtergroup">
+
+            <Button color="secondary" onClick={() => this.props.set("RoHS")} active={this.props.selected.includes("RoHS")} className = "buttonfilter">RoHS</Button>
+            <Button color="secondary" onClick={() => this.props.set("Food")} active={this.props.selected.includes("Food")} className = "buttonfilter">Food Contact</Button>
             <Button color="secondary" onClick={() => this.props.set("Recycle")} active={this.props.selected.includes("Recycle")} className = "buttonfilter">Recyclable</Button>
+
           </div>
           <div className="checkboxtree">
             <CheckboxTree
-                nodes={[this.processData(this.props.data.sort(function(a, b){
-                  if(a['Type1'] == b['Type1']){
-                      return (a['Type2'] < b['Type2']) ? -1 : (a['Type2'] > b['Type2']) ? 1 : 0;
-                  }else{
-                      return (a['Type1'] < b['Type1']) ? -1 : 1;
-                  }
-                }))]}
+                nodes={[this.processData(this.props.data.sort(function(a, b){return a['Type'] > b['Type']}))]}
                 checked={this.props.checked}
                 expanded={this.props.expanded}
                 onCheck={this.props.onCheck}

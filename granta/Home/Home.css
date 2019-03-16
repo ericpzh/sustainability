@@ -1,0 +1,65 @@
+.Home {
+  display: grid;
+  grid-template-columns: 100%;
+  justify-content: center;
+}
+.scroll{
+  background-color: white;
+  height: 88vh;
+  overflow-y: auto;
+}
+.Filter{
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  margin-top: 5%;
+}
+.filtergroup{
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+.buttonfilter{
+  margin: 1% auto;
+}
+.checkboxtree{
+  margin-top: 5%;
+}
+.buttongroup{
+  margin: auto;
+}
+
+.selectcontainer{
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  align-content: space-around;
+}
+
+@media only screen and (max-width: 925px){
+  .select-item{
+    display: grid;
+    grid-template-columns: 85vw;
+    justify-items: center;
+    align-items: center;
+    margin: 1%;
+  }
+}
+@media only screen and (min-width: 925px){
+  .select-item{
+    display: grid;
+    grid-template-columns: 32vw;
+    justify-items: center;
+    align-items: center;
+    margin: 1%;
+  }
+}
+
+.scroll-fix{
+  height: 88vh;
+  overflow-y: auto;
+}
+.buttongroup{
+  width: 75%;
+}
