@@ -8,7 +8,6 @@ import * as math from 'mathjs';
 
 const colorwheel = ['#e6194b', '#3cb44b', '#ffe119', '#4363d8', '#f58231', '#911eb4', '#46f0f0', '#f032e6', '#bcf60c', '#fabebe', '#008080', '#e6beff', '#9a6324', '#fffac8', '#800000', '#aaffc3', '#808000', '#ffd8b1', '#000075', '#808080'];
 
-
 class Graph extends Component {
   constructor(props) {
       super(props);
@@ -36,7 +35,7 @@ class Graph extends Component {
           showlegend: true,
           collapsed: false,
           shapeoption: 0, //0:none, 1:convenHull, 2:big radius
-          vertical: false,
+          vertical: false, //vertical layout of filter+result+options
       };
   }
 
@@ -118,37 +117,83 @@ class Graph extends Component {
       }else{
         size = this.state.width * 0.0075;
       }
-      if (typeof data !== "undefined" && data.length > 0){
-        //build types
-        for (var i = 1; i < data.length ; i++){
-          if (data[i]['Type1'] !== "" && ( i===0 || i>0 && data[i]['Type1'] !== data[i-1]['Type1'])){
-            traces.push({
-              x: [],
-              y: [],
-              text: [],
-              type: 'scatter',
-              mode: mode,
-              name: data[i]['Type1'],
-              textposition: 'bottom center',
-              marker: {
-                size: size,
-                color: colorwheel[(++coloridx)%colorwheel.length]
+
+      //build types assume small type2
+      for (var i = 1; i < data.length ; i++){
+        if (data[i]['Type2'] !== "" && ( i===0 || i>0 && data[i]['Type2'] !== data[i-1]['Type2'])){
+          traces.push({
+            x: [],
+            y: [],
+            text: [],
+            type: 'scatter',
+            mode: mode,
+            name: data[i]['Type2'],
+            textposition: 'bottom center',
+            marker: {
+              size: size,
+              color: colorwheel[(++coloridx)%colorwheel.length]
+            }
+          });
+        }
+      }
+      //build datas
+      for (var i = 0; i < data.length ; i++){
+        if (data[i]['Type2'] !== "" &&  checked.includes(data[i]['Name']) && this.checkselected(data[i])){
+          for (var j = 0; j < traces.length ; j++){
+            if (traces[j]['name'] === data[i]['Type2']){
+              var valid = this.isvalid(data[i]);
+              if (valid){
+                traces[j]['x'].push(valid.x);
+                traces[j]['y'].push(valid.y);
+                traces[j]['text'].push(data[i]['Name']);
               }
-            });
+              break;
+            }
           }
         }
-        //build datas
-        for (var i = 0; i < data.length ; i++){
-          if (data[i]['Type1'] !== "" &&  checked.includes(data[i]['Name']) && this.checkselected(data[i])){
-            for (var j = 0; j < traces.length ; j++){
-              if (traces[j]['name'] === data[i]['Type1']){
-                var valid = this.isvalid(data[i]);
-                if (valid){
-                  traces[j]['x'].push(valid.x);
-                  traces[j]['y'].push(valid.y);
-                  traces[j]['text'].push(data[i]['Name']);
+      }
+
+      var count = 0;
+      for (var i = 0; i < traces.length ; i++){
+        if (traces[i]['x'].length > 0){
+          count ++;
+        }
+      }
+
+      if(count >= colorwheel.length){//build types if large type2
+        traces = [];
+        if (typeof data !== "undefined" && data.length > 0){
+          //build types
+          for (var i = 1; i < data.length ; i++){
+            if (data[i]['Type1'] !== "" && ( i===0 || i>0 && data[i]['Type1'] !== data[i-1]['Type1'])){
+              traces.push({
+                x: [],
+                y: [],
+                text: [],
+                type: 'scatter',
+                mode: mode,
+                name: data[i]['Type1'],
+                textposition: 'bottom center',
+                marker: {
+                  size: size,
+                  color: colorwheel[(++coloridx)%colorwheel.length]
                 }
-                break;
+              });
+            }
+          }
+          //build datas
+          for (var i = 0; i < data.length ; i++){
+            if (data[i]['Type1'] !== "" &&  checked.includes(data[i]['Name']) && this.checkselected(data[i])){
+              for (var j = 0; j < traces.length ; j++){
+                if (traces[j]['name'] === data[i]['Type1']){
+                  var valid = this.isvalid(data[i]);
+                  if (valid){
+                    traces[j]['x'].push(valid.x);
+                    traces[j]['y'].push(valid.y);
+                    traces[j]['text'].push(data[i]['Name']);
+                  }
+                  break;
+                }
               }
             }
           }
@@ -293,20 +338,20 @@ class Graph extends Component {
             }
             shapes.push(shape);
         }else if(this.state.shapeoption === 2){//circle
-          var x25 = math.quantileSeq(traces[i]['x'], 0.25);
-          var x50 = math.quantileSeq(traces[i]['x'], 0.5);
-          var x75 = math.quantileSeq(traces[i]['x'], 0.75);
-          var y25 = math.quantileSeq(traces[i]['y'], 0.25);
-          var y50 = math.quantileSeq(traces[i]['y'], 0.5);
-          var y75 = math.quantileSeq(traces[i]['y'], 0.75);
+          var x25 = parseFloat(math.quantileSeq(traces[i]['x'], 0.25));
+          var x50 = parseFloat(math.quantileSeq(traces[i]['x'], 0.5));
+          var x75 = parseFloat(math.quantileSeq(traces[i]['x'], 0.75));
+          var y25 = parseFloat(math.quantileSeq(traces[i]['y'], 0.25));
+          var y50 = parseFloat(math.quantileSeq(traces[i]['y'], 0.5));
+          var y75 = parseFloat(math.quantileSeq(traces[i]['y'], 0.75));
           var shape = {
               type: 'circle',
               xref: 'x',
               yref: 'y',
-              x0: x50-(x75-x25),
-              y0: y50-(y75-y25),
-              x1: x50+(x75-x25),
-              y1: y50+(y75-y25),
+              x0: parseFloat(x50-(x75-x25)),
+              y0: parseFloat(y50-(y75-y25)),
+              x1: parseFloat(x50+(x75-x25)),
+              y1: parseFloat(y50+(y75-y25)),
               opacity: 0.5,
               fillcolor: traces[i]['marker']['color'],
               line: {
@@ -314,7 +359,18 @@ class Graph extends Component {
                   color: traces[i]['marker']['color'],
               },
           };
-          shapes.push(shape);
+          //Count #points in the circle
+          var count = 0;
+          for (var k = 0; k < traces[i]['x'].length ; k++){
+            var x = traces[i]['x'][k];
+            var y = traces[i]['y'][k];
+            if ((x-x50) <= x75-x25 && (y-y50) <= y75-y25){
+              count ++;
+            }
+          }
+          if (count > 0){
+            shapes.push(shape);
+          }
         }
       }
     }
@@ -477,14 +533,14 @@ class Graph extends Component {
                 <Button2.Group fluid>
                   <Button2 active={!this.state.xlog}  onClick={()=>this.setState({xlog:false,xtype:''})}>X-axis: Normal</Button2>
                   <Button2.Or text="X"/>
-                  <Button2 active={this.state.xlog}  onClick={()=>this.setState({xlog:true,xtype:'log'})}>X-axis: Log</Button2>
+                  <Button2 active={this.state.xlog}  onClick={()=>this.setState({xlog:true,xtype:'log',shapeoption:0})}>X-axis: Log</Button2>
                 </Button2.Group>
               </div>
               <div className = "select-item">
                 <Button2.Group fluid>
                   <Button2 active={!this.state.ylog}  onClick={()=>this.setState({ylog:false,ytype:''})}>Y-axis: Normal</Button2>
                   <Button2.Or text="Y"/>
-                  <Button2 active={this.state.ylog}  onClick={()=>this.setState({ylog:true,ytype:'log'})}>Y-axis: Log</Button2>
+                  <Button2 active={this.state.ylog}  onClick={()=>this.setState({ylog:true,ytype:'log',shapeoption:0})}>Y-axis: Log</Button2>
                 </Button2.Group>
               </div>
 
@@ -494,7 +550,7 @@ class Graph extends Component {
                   <Button2.Or />
                   <Button2 active={this.state.shapeoption===1} onClick={()=>this.setState({shapeoption:1})}>Convex Hull</Button2>
                   <Button2.Or />
-                  <Button2 active={this.state.shapeoption===2} onClick={()=>this.setState({shapeoption:2})}>Heat Map</Button2>
+                  <Button2 active={this.state.shapeoption===2} onClick={()=>this.setState({shapeoption:2})} disabled={this.state.xlog || this.state.ylog}>Heat Map</Button2>
                 </Button2.Group>
               </div>
               <div className = "select-item">

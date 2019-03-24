@@ -42,7 +42,7 @@ class Home3 extends Component {
     styleLink.rel = "stylesheet";
     styleLink.href = "https://cdn.jsdelivr.net/npm/semantic-ui/dist/semantic.min.css";
     document.head.appendChild(styleLink);
-    var csvFilePath = require("../assets/Granta.csv");
+    var csvFilePath = require("../assets/Idematapp.csv");
     var Papa = require("papaparse");
     Papa.parse(csvFilePath, {
       header: true,
@@ -72,23 +72,20 @@ class Home3 extends Component {
     window.removeEventListener('resize', this.updateWindowDimensions);
   }
 
-  initData(result) {
-    this.setState({loading:true});
+  initData(result) {//prepare checkboxtree + initial graph
     var checked = [];
     var expanded = ['All Material'];
-    var impacts = [];
-    var cost = [];
+    var x = [];
+    var y = [];
     const data = result.data;
     for (var i = 0; i < result.data.length ; i++){
-      checked.push(result.data[i]['Name']);
-      cost.push(result.data[i]['Cost']);
-      impacts.push(result.data[i]['Lifecycle Impacts']);
+      x.push(result.data[i]['Life Cycle Carbon Footprint(kg CO2 eq.)']);
+      y.push(result.data[i]['LifeCycle ReCiPe Endpoints']);
     }
-    var impacts75th = math.quantileSeq(impacts, 0.75);
-    var cost75th = math.quantileSeq(cost, 0.75);
-    checked = [];
+    var x75 = math.quantileSeq(x, 0.75);
+    var y75 = math.quantileSeq(y, 0.75);
     for (var i = 0; i < result.data.length ; i++){
-      if (result.data[i]['Lifecycle Impacts'] < 3 * impacts75th && result.data[i]['Cost'] < 3 * cost75th){
+      if (result.data[i]['Life Cycle Carbon Footprint(kg CO2 eq.)'] < 3 * x75 && result.data[i]['LifeCycle ReCiPe Endpoints'] < 3 * y75 && result.data[i]['Life Cycle Carbon Footprint(kg CO2 eq.)'] > 0 && result.data[i]['LifeCycle ReCiPe Endpoints'] > 0){
         checked.push(result.data[i]['Name']);
       }
     }
@@ -97,7 +94,6 @@ class Home3 extends Component {
       checked: checked,
       expanded: expanded,
     });
-    this.setState({loading:false});
   }
 
   setselected(selected) {
@@ -161,34 +157,34 @@ class Home3 extends Component {
         <div className="Home3">
         <Favicon url={favicon} />
         <Header/>
-        <Segment>
-          <Dimmer active={this.state.loading} inverted>
-            <Loader inverted>Loading</Loader>
-          </Dimmer>
-          <Sidebar.Pushable as={Segment}>
-            <Sidebar
-              as={Menu}
-              animation='slide along'
-              direction='left'
-              vertical
-              width = "wide"
-              visible={this.state.sidebarOpen}
-            >
-              <Menu.Item as='a'>
-                <div className="scroll">
-                  <Button fluid onClick={()=>this.setState({sidebarOpen: false})}>Hide</Button>
-                  <Filter3 data = {this.state.data} checked = {this.state.checked} expanded = {this.state.expanded} onCheck = {this.onCheck} onExpand = {this.onExpand} selected = {this.state.selected} set = {this.setselected}/>
+          <Segment>
+            <Dimmer active={this.state.loading} inverted>
+              <Loader inverted>Loading</Loader>
+            </Dimmer>
+            <Sidebar.Pushable as={Segment}>
+              <Sidebar
+                as={Menu}
+                animation='slide along'
+                direction='left'
+                vertical
+                width = "wide"
+                visible={this.state.sidebarOpen}
+              >
+                <Menu.Item as='a'>
+                  <div className="scroll">
+                    <Button fluid onClick={()=>this.setState({sidebarOpen: false})}>Hide</Button>
+                    <Filter3 data = {this.state.data} checked = {this.state.checked} expanded = {this.state.expanded} onCheck = {this.onCheck} onExpand = {this.onExpand} selected = {this.state.selected} set = {this.setselected}/>
                   </div>
-              </Menu.Item>
-            </Sidebar>
-            <Sidebar.Pusher dimmed={!this.state.overlay && this.state.sidebarOpen}>
-              <Segment basic>
-                <div className="scroll-fix">
-                  <Graph3 data = {this.state.data} checked = {this.state.checked} selected = {this.state.selected} sidebartoggle = {this.sidebartoggle} sidebarOpen = {this.state.sidebarOpen} selectionwidth = {this.state.selectionwidth} modal = {this.state.modal} modaltoggle = {this.modaltoggle} updatechecked = {this.updatechecked}/>
-                </div>
-              </Segment>
-            </Sidebar.Pusher>
-          </Sidebar.Pushable>
+                </Menu.Item>
+              </Sidebar>
+              <Sidebar.Pusher dimmed={!this.state.overlay && this.state.sidebarOpen}>
+                <Segment basic>
+                  <div className="scroll-fix">
+                    <Graph3 data = {this.state.data} checked = {this.state.checked} selected = {this.state.selected} sidebartoggle = {this.sidebartoggle} sidebarOpen = {this.state.sidebarOpen} selectionwidth = {this.state.selectionwidth} modal = {this.state.modal} modaltoggle = {this.modaltoggle} updatechecked = {this.updatechecked}/>
+                  </div>
+                </Segment>
+              </Sidebar.Pusher>
+            </Sidebar.Pushable>
           </Segment>
         </div>
       );
